@@ -9,4 +9,19 @@ class Person extends Model
     public function demands() {
         return $this->hasMany('App\Models\Demand');
     }
+
+    public function neighborhood() {
+        return $this->belongsTo('App\Models\Neighborhood');
+    }
+
+    protected $appends = ["full_name","address"];
+
+    public function getFullNameAttribute(){
+        return $this->first_name. ' ' .$this->last_name;
+    }
+
+    public function getAddressAttribute(){
+        return $this->neighborhood->name. " " .$this->street." ".$this->city_name." No: ".$this->gate_no;
+    }
+
 }

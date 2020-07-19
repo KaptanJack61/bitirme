@@ -18,8 +18,16 @@ class AnasayfaController extends Controller
 {
     public function index()
     {
+        /*
+        $person = Person::findOrFail(61);
 
-        /*$help = Help::findOrFail(71);
+        foreach ($person->demands as $p) {
+            dd($p->helps);
+        }
+
+        dd($person->demands);
+
+
 
         $person = Person::findOrFail(2);
 
