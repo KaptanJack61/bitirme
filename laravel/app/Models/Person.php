@@ -10,6 +10,10 @@ class Person extends Model
         return $this->hasMany('App\Models\Demand');
     }
 
+    public function helps() {
+        return $this->hasMany('App\Models\Help');
+    }
+
     public function neighborhood() {
         return $this->belongsTo('App\Models\Neighborhood');
     }

@@ -27,8 +27,6 @@ class AnasayfaController extends Controller
 
         dd($person->demands);
 
-
-
         $person = Person::findOrFail(2);
 
         $demand = Demand::findOrFail(34);

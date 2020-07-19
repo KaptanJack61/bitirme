@@ -148,7 +148,9 @@ class HelpController extends Controller
     {
 
         $model = Help::query();
-        $model->with('neighborhood','status','type');
+        $model->with('person','status','type');
+
+        //dd($model->get());
 
 
         return DataTables::of($model)
@@ -176,16 +178,17 @@ class HelpController extends Controller
 
             ->setRowData([
                 'full_name'=> function($help){
-                    return $help->full_name;
+
+                    return $help->person->full_name;
                 },
                 'street'=> function($help){
-                    return $help->street." ".$help->city_name." No: ".$help->gate_no;
+                    return $help->person->street." ".$help->person->city_name." No: ".$help->person->gate_no;
                 },
-                'neighborhood' => function ($help){
-                    return $help->neighborhood->name;
+                'neighborhoods' => function ($help){
+                    return $help->person->neighborhood->name;
                 },
                 'phone' => function($help){
-                    return Helpers::phoneTextFormat($help->phone);
+                    return Helpers::phoneTextFormat($help->person->phone);
                 },
                 'help_types' => function ($help) {
                     return $help->type->name;
@@ -205,12 +208,17 @@ class HelpController extends Controller
             ])
 
             ->filterColumn('full_name', function($query, $keyword) {
-                $sql = "CONCAT(helps.first_name,'-',helps.last_name)  like ?";
+                $sql = "CONCAT(people.person_slug)  like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('neighborhoods', function($query, $keyword) {
+                $sql = "CONCAT(neighborhoods.slug)  like ?";
                 $query->whereRaw($sql, ["%{$keyword}%"]);
             })
 
             ->filterColumn('address', function($query, $keyword) {
-                $sql = "CONCAT(helps.street,'-',helps.city_name)  like ?";
+                $sql = "CONCAT(people.street,'-',people.city_name)  like ?";
                 $query->whereRaw($sql, ["%{$keyword}%"]);
             })
 
@@ -221,21 +229,25 @@ class HelpController extends Controller
 
             ->addColumn('islemler', function (Help $help) {
 
-                if ($help->status->finisher == true){
-                    return '
+
+
+                if ($help->demandHelp !== null) {
+                    $demand = Demand::find($help->demandHelp->demand_id);
+                    if ($help->status->finisher == true){
+                        return '
                    <a href="#" class="btn btn-warning btn-sm" data-toggle="modal"
                              data-target="#completed"
                              data-helpid="'.$help->id.'"
-                             data-detail="'.$help->detail.'"
+                             data-detail="'.$demand->detail.'"
                           >
                               <i class="fa fa-edit text-dark"></i>
                           </a>
                     ';
-                }else {
-                    return '<a href="#" class="btn btn-success btn-sm" data-toggle="modal"
+                    }else {
+                        return '<a href="#" class="btn btn-success btn-sm" data-toggle="modal"
                              data-target="#completed"
                              data-helpid="'.$help->id.'"
-                             data-detail="'.$help->detail.'"
+                             data-detail="'.$demand->detail.'"
                           >
                               <i class="fa fa-check"></i>
                           </a>
@@ -243,12 +255,12 @@ class HelpController extends Controller
                              data-target="#helpEdit"
                              data-helpid="'.$help->id.'"
                              data-quantity="'.$help->quantity.'"
-                             data-neighborhoodid="'.$help->neighborhood->id.'"
-                             data-neighborhoodname="'.$help->neighborhood->name.'"
+                             data-neighborhoodid="'.$help->person->neighborhood->id.'"
+                             data-neighborhoodname="'.$help->person->neighborhood->name.'"
                              data-metrik="'.$help->type->metrik.'"
-                             data-street="'.$help->street.'"
-                             data-cityname="'.$help->city_name.'"
-                             data-gateno="'.$help->gate_no.'"
+                             data-street="'.$help->person->street.'"
+                             data-cityname="'.$help->person->city_name.'"
+                             data-gateno="'.$help->person->gate_no.'"
                              data-helptypeid="'.$help->type->id.'"
                              data-name="'.$help->type->name.'"
                              data-statusid="'.$help->status->id.'"
@@ -265,6 +277,56 @@ class HelpController extends Controller
                           </a>                       
                           
                           ';
+                    }
+
+                }else {
+
+                    if ($help->status->finisher == true){
+                        return '
+                   <a href="#" class="btn btn-warning btn-sm" data-toggle="modal"
+                             data-target="#completed"
+                             data-helpid="'.$help->id.'"
+                             data-detail=""
+                          >
+                              <i class="fa fa-edit text-dark"></i>
+                          </a>
+                    ';
+                    }else {
+                        return '<a href="#" class="btn btn-success btn-sm" data-toggle="modal"
+                             data-target="#completed"
+                             data-helpid="'.$help->id.'"
+                             data-detail=""
+                          >
+                              <i class="fa fa-check"></i>
+                          </a>
+                          <a href="#" class="btn btn-warning btn-sm" data-toggle="modal"
+                             data-target="#helpEdit"
+                             data-helpid="'.$help->id.'"
+                             data-quantity="'.$help->quantity.'"
+                             data-neighborhoodid="'.$help->person->neighborhood->id.'"
+                             data-neighborhoodname="'.$help->person->neighborhood->name.'"
+                             data-metrik="'.$help->type->metrik.'"
+                             data-street="'.$help->person->street.'"
+                             data-cityname="'.$help->person->city_name.'"
+                             data-gateno="'.$help->person->gate_no.'"
+                             data-helptypeid="'.$help->type->id.'"
+                             data-name="'.$help->type->name.'"
+                             data-statusid="'.$help->status->id.'"
+                             data-statusname="'.$help->status->name.'"
+                          >
+                              <i class="fa fa-edit"></i>
+                          </a>
+
+                          <a id="sil" href="#" class="btn btn-danger btn-sm" 
+                                        data-toggle="modal" 
+                                        data-target="#deleted"
+                                        data-helpid="'.$help->id.'">
+                              <i class="fa fa-trash"></i>
+                          </a>                       
+                          
+                          ';
+                    }
+
                 }
             })
 

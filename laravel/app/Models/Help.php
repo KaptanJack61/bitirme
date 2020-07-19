@@ -21,6 +21,11 @@ class Help extends Model
         return $this->hasOne('App\Models\DemandHelp');
     }
 
-    /*
-    */
+    public function demand(){
+        return $this->belongsToMany('App\Models\Demand');
+    }
+
+    public function person() {
+        return $this->belongsTo('App\Models\Person');
+    }
 }

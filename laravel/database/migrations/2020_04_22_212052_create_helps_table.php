@@ -15,6 +15,7 @@ class CreateHelpsTable extends Migration
     {
         Schema::create('helps', function (Blueprint $table) {
             $table->increments('id');
+            $table->Integer('person_id')->unsigned();
             $table->Integer('help_types_id')->unsigned();
             $table->bigInteger('quantity');
             $table->Integer('status_id')->unsigned();
@@ -25,6 +26,9 @@ class CreateHelpsTable extends Migration
 
             $table->foreign('status_id')->references('id')
                 ->on('statuses')->onDelete('cascade');
+
+            $table->foreign('person_id')->references('id')
+                ->on('people')->onDelete('cascade');
 
         });
     }
