@@ -14,7 +14,7 @@ class PersonTableSeeder extends Seeder
     {
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
         DB::statement('truncate table people');
-        factory(Person::class,70)->create();
+        factory(Person::class,35)->create();
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 }

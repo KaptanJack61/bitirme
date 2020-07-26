@@ -80,9 +80,7 @@ class AnasayfaController extends Controller
 
         $helps = Help::all();
         $help = $helps->count();
-        $person = $helps
-            ->groupBy('person_slug')
-            ->count();
+        $person = Person::all();
 
         $maskeSayisi = DB::table('helps')
             ->where('help_types_id','=','7')
@@ -102,7 +100,7 @@ class AnasayfaController extends Controller
         Session::put('menu_acilma', 'anasayfa');
         return view('yonetim.anasayfa')->with([
             'helps' => $help,
-            'people' => $person,
+            'people' => $person->count(),
             'maskeSayisi' => $maskeSayisi,
             'bekleyenTalep' => $bekleyenTalep,
         ]);

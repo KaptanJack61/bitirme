@@ -3,7 +3,7 @@
 @include('sweetalert::alert')
 
 <footer class="main-footer fixed-bottom">
-    <strong>Copyright &copy; 2020 <a href="http://kptn.xyz" target="_blank"><b>Hamdi Kalaycı</b></a>.</strong>
+    <strong>Copyright &copy; 2020 <a href="http://kptn.xyz" target="_blank"><b>Sosyal Yardım Takip Sistemi</b></a>.</strong>
     Tüm hakları Saklıdır.
     <div class="float-right d-none d-sm-inline-block">
       <b>Sürüm: </b> {{ config('app.version') }}

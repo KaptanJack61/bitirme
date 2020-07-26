@@ -48,6 +48,7 @@
                   <th>Adet</th>
                   <th>Mahalle</th>
                   <th>Adres</th>
+                  <th>Durum</th>
                   <th>Kayıt Tarihi</th>
                   <th>Son İşlem Tarihi</th>
                   <th>İşlemler</th>
@@ -81,14 +82,15 @@
         order: [[ 7, "desc" ]],
         columns: [
             { data: 'id', name:'id'},
-            { data: 'DT_RowData.full_name', name:'helps.first_name',orderable: false, search: false},
-            { data: 'DT_RowData.phone', name:'phone'},
-            { data: 'DT_RowData.sum', name: 'sum', orderable: false, searching: false},
-            { data: 'DT_RowData.neighborhood',orderable: false, searching: false},
-            { data: 'DT_RowData.street', name:'street',orderable: false, searching: false},
+            { data: 'DT_RowData.full_name', name:'people.first_name'},
+            { data: 'DT_RowData.phone', name:'people.phone'},
+            { data: 'DT_RowData.sum', searchable: false, orderable: false},
+            { data: 'DT_RowData.neighborhood',name: 'neighborhoods.name'},
+            { data: 'DT_RowData.street', name:'people.street'},
+            { data: 'status', searchable: false, orderable: false},
             { data: 'DT_RowData.date', name:'created_at'},
             { data: 'DT_RowData.udate', name:'updated_at'},
-            { data: 'islemler', name: 'islemler', orderable: false, searching: false}
+            { data: 'islemler', name: 'islemler', orderable: false, searchable: false}
         ],
         language: {
             "lengthMenu": "Sayfada _MENU_ kayıt göster",

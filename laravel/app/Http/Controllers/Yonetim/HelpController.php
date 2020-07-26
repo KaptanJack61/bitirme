@@ -34,17 +34,33 @@ class HelpController extends Controller
     }
 
     public function getNotCompletedHelps(){
+
+
         $model = Help::query();
+        $model->with('type');
         $model->join('statuses','statuses.id','=','helps.status_id');
-        $model->select(['helps.*']);
-        $model->where('statuses.finisher','=',0);
-        $model->with('neighborhood','status','type');
+        $model->join('demand_help','demand_help.help_id','helps.id');
+        $model->join('demands','demands.id','demand_help.demand_id');
+        $model->join('people','people.id','demands.person_id');
+        $model->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+        $model->where('statuses.finisher', '=',false);
+        $model->select(
+            'helps.*',
+            'people.first_name',
+            'people.last_name',
+            'people.person_slug',
+            'people.street',
+            'people.city_name',
+            'people.gate_no',
+            'people.phone',
+            'demands.detail',
+            'statuses.name as statusname',
+            'statuses.id as statusid',
+            'neighborhoods.name as neighborhoodname',
+            'neighborhoods.id as neighborhoodid'
+        );
 
         return DataTables::of($model)
-
-            ->setRowClass(function ($help){
-                return $help->status->finisher == true ? 'alert-success' : '';
-            })
 
             ->setRowAttr([
                 'data-toggle' => "tooltip",
@@ -57,13 +73,13 @@ class HelpController extends Controller
 
             ->setRowData([
                 'full_name'=> function($help){
-                    return $help->full_name;
+                    return $help->first_name.' '.$help->last_name;
                 },
                 'street'=> function($help){
                     return $help->street." ".$help->city_name." No: ".$help->gate_no;
                 },
-                'neighborhood' => function ($help){
-                    return $help->neighborhood->name;
+                'neighborhoods' => function ($help){
+                    return $help->neighborhoodname;
                 },
                 'phone' => function($help){
                     return Helpers::phoneTextFormat($help->phone);
@@ -73,9 +89,6 @@ class HelpController extends Controller
                 },
                 'quantity' => function ($help) {
                     return $help->quantity." ".$help->type->metrik;
-                },
-                'status' => function ($help) {
-                    return $help->status->name;
                 },
                 'date' => function ($help) {
                     return date('d.m.Y', strtotime($help->created_at));
@@ -98,10 +111,14 @@ class HelpController extends Controller
                 $query->whereRaw($sql, ["%{$keyword}%"]);
             })
 
-            ->addColumn('islemler', function (Help $help) {
+            ->addColumn('statuses', function($help) {
+                if ($help->statusid == 1)
+                    return '<h5><span class="badge badge-pill badge-success">'.$help->statusname.'</span></h5>';
+                else
+                    return '<h5><span class="badge badge-pill badge-warning">'.$help->statusname.'</span></h5>';
+            })
 
-                if ($help->status->finisher == true)
-                    return '';
+            ->addColumn('islemler', function (Help $help) {
 
                 return '<a href="#" class="btn btn-success btn-sm" data-toggle="modal"
                              data-target="#completed"
@@ -114,16 +131,16 @@ class HelpController extends Controller
                              data-target="#helpEdit"
                              data-helpid="'.$help->id.'"
                              data-quantity="'.$help->quantity.'"
-                             data-neighborhoodid="'.$help->neighborhood->id.'"
-                             data-neighborhoodname="'.$help->neighborhood->name.'"
+                             data-neighborhoodid="'.$help->neighborhoodid.'"
+                             data-neighborhoodname="'.$help->neighborhoodname.'"
                              data-metrik="'.$help->type->metrik.'"
                              data-street="'.$help->street.'"
                              data-cityname="'.$help->city_name.'"
                              data-gateno="'.$help->gate_no.'"
                              data-helptypeid="'.$help->type->id.'"
                              data-name="'.$help->type->name.'"
-                             data-statusid="'.$help->status->id.'"
-                             data-statusname="'.$help->status->name.'"
+                             data-statusid="'.$help->statusid.'"
+                             data-statusname="'.$help->statusname.'"
                           >
                               <i class="fa fa-edit"></i>
                           </a>
@@ -138,7 +155,7 @@ class HelpController extends Controller
                           ';
             })
 
-            ->rawColumns(['islemler', 'mahalle'])
+            ->rawColumns(['islemler','statuses'])
 
             ->make(true);
 
@@ -148,10 +165,24 @@ class HelpController extends Controller
     {
 
         $model = Help::query();
-        $model->with('person','status','type');
-
-        //dd($model->get());
-
+        $model->with('status','type');
+        $model->join('demand_help','demand_help.help_id','helps.id');
+        $model->join('demands','demands.id','demand_help.demand_id');
+        $model->join('people','people.id','demands.person_id');
+        $model->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+        $model->select(
+            'helps.*',
+            'people.first_name',
+            'people.last_name',
+            'people.person_slug',
+            'people.street',
+            'people.city_name',
+            'people.gate_no',
+            'people.phone',
+            'demands.detail',
+            'neighborhoods.name as neighborhoodname',
+            'neighborhoods.id as neighborhoodid'
+        );
 
         return DataTables::of($model)
 
@@ -165,39 +196,25 @@ class HelpController extends Controller
                 'role' => 'row'
             ])
 
-            ->setRowClass(function ($help){
-                if ($help->status->finisher == true and $help->status->id != 7) {
-                    return 'alert-success';
-                }
-
-                if ($help->status->finisher == true and $help->status->id == 7){
-                    return 'alert-danger';
-                }
-
-            })
-
             ->setRowData([
                 'full_name'=> function($help){
 
-                    return $help->person->full_name;
+                    return $help->first_name.' '.$help->last_name;
                 },
                 'street'=> function($help){
-                    return $help->person->street." ".$help->person->city_name." No: ".$help->person->gate_no;
+                    return $help->street." ".$help->city_name." No: ".$help->gate_no;
                 },
                 'neighborhoods' => function ($help){
-                    return $help->person->neighborhood->name;
+                    return $help->neighborhoodname;
                 },
                 'phone' => function($help){
-                    return Helpers::phoneTextFormat($help->person->phone);
+                    return Helpers::phoneTextFormat($help->phone);
                 },
                 'help_types' => function ($help) {
                     return $help->type->name;
                 },
                 'quantity' => function ($help) {
                     return $help->quantity." ".$help->type->metrik;
-                },
-                'status' => function ($help) {
-                    return $help->status->name;
                 },
                 'date' => function ($help) {
                     return date('d.m.Y', strtotime($help->created_at));
@@ -225,6 +242,19 @@ class HelpController extends Controller
             ->filterColumn('date', function($query, $keyword) {
                 $sql = "select * from helps where date(created_at) = date($keyword)";
                 $query->whereRaw($sql,$keyword);
+            })
+
+            ->addColumn('statuses', function($help) {
+                if ($help->status->finisher == true and $help->status->id != 5) {
+                    return '<h5><span class="badge badge-pill badge-secondary">'.$help->status->name.'</span></h5>';
+                }else if ($help->status->finisher == true and $help->status->id == 5){
+                    return '<h5><span class="badge badge-pill badge-danger">'.$help->status->name.'</span></h5>';
+                }else {
+                    if ($help->status->finisher == false and $help->status->id != 1)
+                        return '<h5><span class="badge badge-pill badge-warning">'.$help->status->name.'</span></h5>';
+                    else
+                        return '<h5><span class="badge badge-pill badge-success">'.$help->status->name.'</span></h5>';
+                }
             })
 
             ->addColumn('islemler', function (Help $help) {
@@ -255,13 +285,13 @@ class HelpController extends Controller
                              data-target="#helpEdit"
                              data-helpid="'.$help->id.'"
                              data-quantity="'.$help->quantity.'"
-                             data-neighborhoodid="'.$help->person->neighborhood->id.'"
-                             data-neighborhoodname="'.$help->person->neighborhood->name.'"
+                             data-neighborhoodid="'.$help->neighborhoodid.'"
+                             data-neighborhoodname="'.$help->neighborhoodname.'"
                              data-metrik="'.$help->type->metrik.'"
-                             data-street="'.$help->person->street.'"
-                             data-cityname="'.$help->person->city_name.'"
-                             data-gateno="'.$help->person->gate_no.'"
-                             data-helptypeid="'.$help->type->id.'"
+                             data-street="'.$help->street.'"
+                             data-cityname="'.$help->city_name.'"
+                             data-gateno="'.$help->gate_no.'"
+                             data-helptypeid="'.$help->help_types_id.'"
                              data-name="'.$help->type->name.'"
                              data-statusid="'.$help->status->id.'"
                              data-statusname="'.$help->status->name.'"
@@ -303,13 +333,13 @@ class HelpController extends Controller
                              data-target="#helpEdit"
                              data-helpid="'.$help->id.'"
                              data-quantity="'.$help->quantity.'"
-                             data-neighborhoodid="'.$help->person->neighborhood->id.'"
-                             data-neighborhoodname="'.$help->person->neighborhood->name.'"
+                             data-neighborhoodid="'.$help->neighborhoodid.'"
+                             data-neighborhoodname="'.$help->neighborhoodname.'"
                              data-metrik="'.$help->type->metrik.'"
-                             data-street="'.$help->person->street.'"
-                             data-cityname="'.$help->person->city_name.'"
-                             data-gateno="'.$help->person->gate_no.'"
-                             data-helptypeid="'.$help->type->id.'"
+                             data-street="'.$help->street.'"
+                             data-cityname="'.$help->city_name.'"
+                             data-gateno="'.$help->gate_no.'"
+                             data-helptypeid="'.$help->help_types_id.'"
                              data-name="'.$help->type->name.'"
                              data-statusid="'.$help->status->id.'"
                              data-statusname="'.$help->status->name.'"
@@ -330,7 +360,7 @@ class HelpController extends Controller
                 }
             })
 
-            ->rawColumns(['islemler'])
+            ->rawColumns(['islemler','statuses'])
 
             ->make(true);
 

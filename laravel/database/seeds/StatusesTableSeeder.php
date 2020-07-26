@@ -31,6 +31,10 @@ class StatusesTableSeeder extends Seeder
             [
                 "name" => "Tamamlanamadı",
                 "finisher" => false
+            ],
+            [
+                "name" => "Reddedildi",
+                "finisher" => true
             ]
         ];
 

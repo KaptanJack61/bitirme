@@ -150,15 +150,15 @@
         order: [[ 9, "desc" ]],
         columns: [
             { data: 'id', name:'id'},
-            { data: 'DT_RowData.full_name', name:'first_name'},
-            { data: 'DT_RowData.phone', name:'phone'},
+            { data: 'DT_RowData.full_name', name:'people.person_slug'},
+            { data: 'DT_RowData.phone', name:'people.phone'},
             { data: 'DT_RowData.help_types', name:'type.name'},
-            { data: 'DT_RowData.quantity', name:'quantity'},
-            {data: 'DT_RowData.neighborhood',name: 'neighborhood.name'},
-            { data: 'DT_RowData.street', name:'street'},
-            { data: 'DT_RowData.status', name:'status.name'},
-            { data: 'DT_RowData.date', name:'created_at'},
-            { data: 'DT_RowData.udate', name:'updated_at'},
+            { data: 'DT_RowData.quantity', name:'helps.quantity'},
+            { data: 'DT_RowData.neighborhoods',name: 'neighborhoods.name'},
+            { data: 'DT_RowData.street', name:'people.street'},
+            { data: 'statuses', name:'statuses.name'},
+            { data: 'DT_RowData.date', name:'helps.created_at'},
+            { data: 'DT_RowData.udate', name:'helps.updated_at'},
             { data: 'islemler', name: 'islemler', orderable: false}
         ],
         language: {

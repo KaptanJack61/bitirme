@@ -59,7 +59,7 @@
                         <button type="submit" class="btn btn-login float-right">Giriş Yap</button>
                     </div>
                 </form>
-                <div class="copy-text">Serdivan Belediyesi <i class="fa fa-heart"></i> by <a href="http://kptn.xyz" target="_blank">Hamdi Kalaycı</a></div>
+                <div class="copy-text">Sosyal Yardım Takip Sistemi <i class="fa fa-heart"></i></div>
             </div>
             <div class="col-md-8 banner-sec">
                 <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -67,7 +67,7 @@
                         <div class="carousel-item active">
                             <div class="carousel-caption d-none d-md-block">
                                 <div class="banner-text">
-                                    <h2 class="">Serdivan Belediyesi | Bilgi İşlem | Hamdi Kalaycı</h2>
+                                    <h2 class="">Sosyal Yardım Takip Sistemi</h2>
                                     <p>  </p>
                                 </div>
                             </div>

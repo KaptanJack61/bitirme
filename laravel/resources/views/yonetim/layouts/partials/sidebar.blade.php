@@ -3,7 +3,7 @@
     <!-- Brand Logo -->
     <a href="{{ route('yonetim.anasayfa') }}" class="brand-link text-center">
 
-        <span class="brand-text font-weight-light">Serdivan Belediyesi<br />Yardım Masası</span>
+        <span class="brand-text font-weight-light">Sosyal Yardım<br />Takip Sistemi</span>
     </a>
 
     <!-- Sidebar -->

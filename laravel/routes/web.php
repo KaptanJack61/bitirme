@@ -76,8 +76,8 @@ Route::group(['namespace' => 'Yonetim'], function () {
         Route::get('/yapilanyardim/detail/{id}','HelpController@detail')->name('yardimtalebi.detail');
 
         //Yardım Talepleri
-        Route::get('/yardimtalepleri','DemandController@index')->name('yardimtalepleri.demands');
-        Route::get('/yardimtalepleri2','DemandController@index2')->name('yardimtalepleri.getDemands');
+        Route::get('/yardimtalepleri','DemandController@index2')->name('yardimtalepleri.demands');
+        //Route::get('/yardimtalepleri2','DemandController@index2')->name('yardimtalepleri.getDemands');
         Route::get('/getDemands','DemandController@getDemands')->name('yardimtalepleri.getDemands');
         Route::get('/yardimtalebi/sil/{id}','DemandController@destroy')->name('yardimtalebi.all.destroy');
         Route::get('/yardimtalebi/detay/{id}','DemandController@detail')->name('yardimtalebi.all.detail');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Yonetim;
 use Alert;
 use App\Helpers\Helpers;
 use App\Models\Demand;
+use App\Models\DemandHelp;
 use App\Models\Help;
 use App\Models\HelpType;
 use DataTables;
@@ -46,26 +47,57 @@ class DemandController extends Controller
     public function getDemands(){
 
         $model = Demand::query();
+        $model->join('people', 'people.id','demands.person_id');
+        $model->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+        $model->select(
+            'demands.*',
+            'people.first_name',
+            'people.last_name',
+            'people.phone',
+            'people.street',
+            'people.city_name',
+            'people.gate_no',
+            'neighborhoods.name as neighborhoodname'
+        );
 
         return DataTables::of($model)
+
+            /*->setRowClass(function ($demand){
+
+                $demandhelp = DemandHelp::query();
+                $demandhelp->where('demand_id','=', $demand->id);
+                $dhelp = $demandhelp->get();
+
+                $closed = 0;
+                $count = $dhelp->count();
+
+                foreach ($dhelp as $dh) {
+                    if ($dh->help->status->finisher == true)
+                        $closed++;
+                }
+
+                if ($closed == $count)
+                    return 'alert-success';
+
+            })*/
+
             ->setRowData([
                 'full_name'=> function($demand){
-                    $help = Help::where('phone','=',$demand->phone)->limit(1)->get()[0];
-                    return $help->full_name;
+                    return $demand->person->full_name;
                 },
                 'street'=> function($demand){
-                    $help = Help::where('phone','=',$demand->phone)->limit(1)->get()[0];
-                    return $help->street." ".$help->city_name." No: ".$help->gate_no;
+                    return $demand->street." ".$demand->city_name." No: ".$demand->gate_no;
                 },
                 'neighborhood' => function ($demand){
-                    $help = Help::where('phone','=',$demand->phone)->limit(1)->get()[0];
-                    return $help->neighborhood->name;
+                    return $demand->person->neighborhood->name;
                 },
                 'phone' => function($demand){
-                    return Helpers::phoneTextFormat($demand->phone);
+                    return Helpers::phoneTextFormat($demand->person->phone);
                 },
                 'sum' => function ($demand) {
-                    return count(json_decode($demand->helps)). " Adet";
+                    $demandhelp = DemandHelp::query();
+                    $demandhelp->where('demand_id','=', $demand->id);
+                    return $demandhelp->count(). " Adet";
                 },
                 'date' => function ($demand) {
                     return date('d.m.Y', strtotime($demand->created_at));
@@ -76,7 +108,7 @@ class DemandController extends Controller
             ])
 
             ->filterColumn('full_name', function($query, $keyword) {
-                $sql = "CONCAT(helps.first_name,'-',helps.last_name)  like ?";
+                $sql = "CONCAT(people.first_name,'-',people.last_name)  like ?";
                 $query->whereRaw($sql, ["%{$keyword}%"]);
             })
 
@@ -86,13 +118,57 @@ class DemandController extends Controller
             })
 
             ->filterColumn('address', function($query, $keyword) {
-                $sql = "CONCAT(helps.street,'-',helps.city_name)  like ?";
+                $sql = "CONCAT(people.street,'-',people.city_name)  like ?";
                 $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->filterColumn('sum', function($query, $keyword) {
+                $sql = "CONCAT(people.street,'-',people.city_name)  like ?";
+                $query->whereRaw($sql, ["%{$keyword}%"]);
+            })
+
+            ->addColumn('status', function ($demand) {
+                $demandhelp = DemandHelp::query();
+                $demandhelp->where('demand_id','=', $demand->id);
+                $dhelp = $demandhelp->get();
+
+                $closed = 0;
+                $open = 0;
+                $count = $dhelp->count();
+
+                foreach ($dhelp as $dh) {
+                    if ($dh->help->status->finisher == true)
+                        $closed++;
+                    else
+                        $open++;
+                }
+
+                if ($closed == $count)
+                    return '<h5><span class="badge badge-pill badge-secondary">Tamamlandı</span></h5>';
+
+                if ($open == $count)
+                    return '<h5><span class="badge badge-pill badge-success">İşleme Alındı</span></h5>';
+
+                return '<h5><span class="badge badge-pill badge-warning">'.$closed.' Adet Tamamlandı</span></h5>';
+
             })
 
             ->addColumn('islemler', function ($demand) {
 
-                return '                         
+                $demandhelp = DemandHelp::query();
+                $demandhelp->where('demand_id','=', $demand->id);
+                $dhelp = $demandhelp->get();
+
+                $closed = 0;
+                $count = $dhelp->count();
+
+                foreach ($dhelp as $dh) {
+                    if ($dh->help->status->finisher == true)
+                        $closed++;
+                }
+
+                if ($closed != $count){
+                    return '                         
                           <a id="duzenle" href='.route('yardimtalebi.all.updateIndex',  ['id' => $demand->id]).'
                              class="btn btn-warning btn-sm" data-toggle="tooltip" data-toggle="tooltip" data-placement="top" title="Düzenle"                         
                              
@@ -115,9 +191,21 @@ class DemandController extends Controller
                           </a>                         
                           
                           ';
+                }else {
+                    return '                          
+                          <a id="goruntule" href='.route('yardimtalebi.all.detail',  ['id' => $demand->id]).' 
+                                        class="btn btn-primary btn-sm"
+                                        data-toggle="tooltip" data-placement="top" title="Görüntüle" 
+                          >
+                              <i class="fa fa-eye"></i>
+                          </a>                         
+                          
+                          ';
+                }
+
             })
 
-            ->rawColumns(['islemler', 'mahalle'])
+            ->rawColumns(['islemler', 'mahalle','status'])
 
             ->make(true);
     }
