@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Yonetim;
 
 use Alert;
+use App\Models\Person;
 use Helpers;
 use App\Models\Demand;
 use App\Models\Help;
@@ -36,12 +37,11 @@ class SearchController extends Controller
 
     public function searchWithPhone($phone){
 
-        $help = Help::where('phone','=',Helpers::convertToIntPhone($phone))
-            ->get();
+        $helps = $this->helpSqlQuery('people.phone',Helpers::convertToIntPhone($phone),"=");
 
-        if (count($help) != 0) {
+        if (count($helps) != 0) {
             return view('yonetim.search.phone')->with([
-                'helps' => $help,
+                'helps' => $helps,
                 'phone' => Helpers::phoneTextFormat($phone)
             ]);
         }else{
@@ -52,25 +52,37 @@ class SearchController extends Controller
     }
 
     public function searchWithDemand($id){
+
         $demand = Demand::find($id);
+
         if ($demand != null){
-            $helpList = json_decode($demand->helps);
+            $helpList = $demand->helps;
             $count = count($helpList);
+
             if ($count == 0){
                 Alert::error('Hata','Yardım talebinde istek yardım kalmamış');
                 return redirect()->back();
             }
 
-            $hid = $helpList[0];
-            $help = Help::find($hid);
+            $closed = 0;
+            $open = 0;
+
+            foreach ($helpList as $help) {
+                if ($help->status->finisher == true)
+                    $closed++;
+                else
+                    $open++;
+            }
 
             return view('yonetim.search.demand')->with([
                 'demand' => $demand,
-                'phone' => Helpers::phoneTextFormat($demand->phone),
+                'phone' => Helpers::phoneTextFormat($demand->person->phone),
                 'count' => $count,
-                'full_name' => $help->full_name,
-                'neighborhood' => $help->neighborhood->name,
-                'address' => $help->address
+                'full_name' => $demand->person->full_name,
+                'neighborhood' => $demand->person->neighborhood->name,
+                'address' => $demand->person->address,
+                'open' => $open,
+                'closed' => $closed
             ]);
 
         }else {
@@ -81,11 +93,11 @@ class SearchController extends Controller
     }
 
     public function searchWithHelp($id){
-        $help = Help::find($id);
+        $helps = $this->helpSqlQuery('helps.id',$id,"=");
 
-        if ($help != null) {
+        if ($helps != null) {
             return view('yonetim.search.helpno')->with([
-                'help' => $help
+                'helps' => $helps
             ]);
         }else{
             Alert::error('Hata',$id.' yapılan yardım numarasına ait kayıt bulunamadı');
@@ -94,7 +106,7 @@ class SearchController extends Controller
     }
 
     public function searchWithTcNumber($tcNo){
-        $helps = Help::where('tc_no','=',$tcNo)->get();
+        $helps = $this->helpSqlQuery('people.tc_no',$tcNo,"=");
         if (count($helps) != 0){
             return view('yonetim.search.tc_no')->with([
                 'helps' => $helps,
@@ -110,8 +122,9 @@ class SearchController extends Controller
 
     public function searchWithNeighborhood($nid){
 
-        $helps = Help::where('neighborhood_id','=',$nid)->get();
+        $helps = $this->helpSqlQuery('neighborhoods.id',$nid,"=");
         $neighborhood = Neighborhood::find($nid);
+
         if (count($helps) != 0){
             return view('yonetim.search.neighborhood')->with([
                 'helps' => $helps,
@@ -126,15 +139,16 @@ class SearchController extends Controller
     }
 
     public function searchWithStreet($streetName){
-        $helps = Help::where('street','like','%'.$streetName.'%')->get();
+
+        $helps = $this->helpSqlQuery('people.person_slug',$streetName,"like");
 
         if (count($helps) != 0){
             return view('yonetim.search.street')->with([
                 'helps' => $helps,
                 'streetName' => $streetName
             ]);
-        }
-        else{
+
+        }else {
             Alert::warning('Uyarı',$streetName." sokağında yardım bulunamadı");
             return redirect()->back();
         }
@@ -143,18 +157,39 @@ class SearchController extends Controller
 
     public function searchWithFullName($name){
 
-        $helps = Help::where('person_slug','like','%'.str_slug($name).'%')->get();
+        $helps = $this->helpSqlQuery('people.person_slug',str_slug($name),"like");
+
         if (count($helps) != 0){
             return view('yonetim.search.full_name')->with([
                 'helps' => $helps,
                 'full_name' => $name
             ]);
-        }else{
+
+        }else {
             Alert::warning('Uyarı',$name. " adında kimseye ait yardım bulunuamadı");
             return redirect()->back();
         }
 
+    }
 
+    public function helpSqlQuery($column, $value, $operator){
 
+        $hqb = Help::query();
+        $hqb->join('demand_help','helps.id','demand_help.help_id');
+        $hqb->join('demands','demands.id','demand_help.demand_id');
+        $hqb->join('people','people.id','demands.person_id');
+        $hqb->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+        $hqb->select('helps.*','people.first_name','people.last_name','people.city_name',
+            'people.street','people.gate_no','demands.detail','people.phone','neighborhoods.name as neighborhood');
+
+        if ($operator == "like") {
+            $hqb->where($column,'like','%'.$value.'%')->get();
+        }
+
+        if ($operator == "=") {
+        $hqb->where($column,'=',$value)->get();
+        }
+
+        return $hqb->get();
     }
 }

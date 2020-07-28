@@ -1,6 +1,6 @@
 @extends('yonetim.layouts.master')
 
-@section('title', 'Y.No: '.$help->id.' | '.config('app.name'))
+@section('title', 'Y.No: '.$helps[0]->id.' | '.config('app.name'))
 @section('header')
 
 <link rel="stylesheet" href="/css/plugins/datatables/dataTables.bootstrap4.css">
@@ -15,7 +15,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1 class="m-0 text-dark">Yardım No: {{ $help->id }}
+            <h1 class="m-0 text-dark">Yardım No: {{ $helps[0]->id }}
                 </h1>
           </div><!-- /.col -->
           <div class="col-sm-6">
@@ -23,7 +23,7 @@
               <li class="breadcrumb-item"><a href="/anasayfa">Yardım Masası</a></li>
               <li class="breadcrumb-item">Yardım Ara</li>
                 <li class="breadcrumb-item">Yapılan Yardım Numarası</li>
-                <li class="breadcrumb-item active">{{$help->id}}</li>
+                <li class="breadcrumb-item active">{{$helps[0]->id}}</li>
             </ol>
           </div><!-- /.col -->
         </div><!-- /.row -->
@@ -59,26 +59,31 @@
               </tr>
               </thead>
               <tbody>
-                  @if($help->status->finisher==true)
-                      @if ($help->status->id == 7)
-                          <tr style="background-color: red; color: white" data-toggle="tooltip" data-placement="top" title="{{ $help->detail }}">
-                      @else
-                          <tr style="background-color: #00cc66" data-toggle="tooltip" data-placement="top" title="{{ $help->detail }}">
-                      @endif
 
-                  @else
-                      <tr>
-                          @endif
+              @foreach($helps as $help)
+
+               <tr data-toggle="tooltip" data-placement="top" title="{{ $help->detail }}">
+
                   <td class="text-center">{{ $help->id }}</td>
-                  <td>{{ $help->full_name }}</td>
+                  <td>{{ $help->first_name." ".$help->last_name }}</td>
                         <td>{{ Helpers::phoneTextFormat($help->phone) }}</td>
                     <td>{{ $help->type->name }}</td>
                     <td>{{ $help->quantity." ".$help->type->metrik }}</td>
-                    <td>{{ $help->neighborhood->name }}</td>
+                    <td>{{ $help->neighborhood }}</td>
                     <td>
                         {{ $help->street." ".$help->cty_name. " No:".$help->gate_no  }}
                     </td>
-                    <td>{{ $help->status->name }}</td>
+                   <td>
+                       @if($help->status->finisher == false and $help->status->id == 1)
+                           <h5><span class="badge badge-pill badge-success">{{ $help->status->name }}</span></h5>
+                       @elseif($help->status->finisher == true and $help->status->id == 5)
+                           <h5><span class="badge badge-pill badge-danger">{{ $h->status->name }}</span></h5>
+                       @elseif($help->status->finisher == false and $help->status->id != 1)
+                           <h5><span class="badge badge-pill badge-warning">{{ $help->status->name }}</span></h5>
+                       @elseif($help->status->finisher == true and $help->status->id != 5)
+                           <h5><span class="badge badge-pill badge-secondary">{{ $help->status->name }}</span></h5>
+                       @endif
+                   </td>
                   <td class="text-center">{{ date('d.m.Y', strtotime($help->created_at)) }}</td>
                         <td class="text-center">{{ date('d.m.Y', strtotime($help->updated_at)) }}</td>
                   <td class="text-center">
@@ -121,9 +126,11 @@
 
                   </td>
                 </tr>
+               @endforeach
               </tbody>
               <tfoot>
               <tr>
+                  <th>#</th>
                   <th>Ad Soyad</th>
                   <th>Telefon</th>
                   <th>Yardım Türü</th>

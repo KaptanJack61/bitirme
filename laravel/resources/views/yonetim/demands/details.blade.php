@@ -71,32 +71,36 @@
                                 <form class="form-control" id="editAllInputForm" action="{{ route('yardimtalebi.edit',['id'=>$demand_no]) }} " method="post">
                                     {{ csrf_field() }}
 
-                                    <div class="col-md-12 text-right">
-                                        <button id="editAllInputSubmit"  style="display: none" type="submit" class="btn btn-success" title="Güncelle">
-                                            <i class="fa fa-check"></i> Güncelle
-                                        </button>
+                                    @if ($closed == false)
+                                        <div class="col-md-12 text-right">
+                                            <button id="editAllInputSubmit"  style="display: none" type="submit" class="btn btn-success" title="Güncelle">
+                                                <i class="fa fa-check"></i> Güncelle
+                                            </button>
 
-                                        <a id="editAllInputCancel" href="#" style="display: none" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Vazgeç">
-                                            <i class="fa fa-trash"></i> Vazgeç
-                                        </a>
+                                            <a id="editAllInputCancel" href="#" style="display: none" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Vazgeç">
+                                                <i class="fa fa-trash"></i> Vazgeç
+                                            </a>
 
-                                        <button id="editAllInputToggle" type="button" class="btn btn-warning" title="Düzenle">
-                                            <i class="fa fa-edit"></i> Yardım Miktarlarını Düzenle
-                                        </button>
+                                            <button id="editAllInputToggle" type="button" class="btn btn-warning" title="Düzenle">
+                                                <i class="fa fa-edit"></i> Yardım Miktarlarını Düzenle
+                                            </button>
 
-                                        <a id="editAllInputWithPerson" href="{{route('yardimtalebi.all.updateIndex',['id' => $demand_no])}}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Kişi Bilgileri İle Düzenle">
-                                            <i class="fa fa-edit"></i> Kişi Bilgileri İle Düzenle
-                                        </a>
+                                            <a id="editAllInputWithPerson" href="{{route('yardimtalebi.all.updateIndex',['id' => $demand_no])}}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Kişi Bilgileri İle Düzenle">
+                                                <i class="fa fa-edit"></i> Kişi Bilgileri İle Düzenle
+                                            </a>
 
-                                        <a id="delete" href="{{route('yardimtalebi.all.destroy',['id'=>$demand_no])}}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Sil">
-                                            <i class="fa fa-trash"></i> Sil
-                                        </a>
+                                            <a id="delete" href="{{route('yardimtalebi.all.destroy',['id'=>$demand_no])}}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Sil">
+                                                <i class="fa fa-trash"></i> Sil
+                                            </a>
 
-                                        <a id="kapatma" href="#" class="btn btn-dark" data-toggle="tooltip" data-placement="top" title="Hepsini kapat">
-                                            <i class="fa fa-reply-all"></i> Toplu Kapatma
-                                        </a>
+                                            <a id="kapatma" href="#" class="btn btn-dark" data-toggle="tooltip" data-placement="top" title="Hepsini kapat">
+                                                <i class="fa fa-reply-all"></i> Toplu Kapatma
+                                            </a>
 
-                                    </div>
+                                        </div>
+                                    @endif
+
+
                                     <br />
                                     <table id="yardimlar" class="table table-bordered table-striped">
                                         <thead>

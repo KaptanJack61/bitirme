@@ -60,26 +60,31 @@
               </thead>
               <tbody>
               @foreach($helps as $h)
-                @if($h->status->finisher==true)
-                    @if ($h->status->id == 7)
-                        <tr style="background-color: red; color: white" data-toggle="tooltip" data-placement="top" title="{{ $h->detail }}">
-                    @else
-                        <tr style="background-color: #00cc66" data-toggle="tooltip" data-placement="top" title="{{ $h->detail }}">
-                    @endif
 
-                      @else
-                    <tr>
-                 @endif
+                        <tr data-toggle="tooltip" data-placement="top" title="{{ $h->detail }}">
+
+
                   <td class="text-center">{{ $h->id }}</td>
-                  <td>{{ $h->full_name }}</td>
+                  <td>{{ $h->first_name." ".$h->last_name }}</td>
                     <td>{{ Helpers::phoneTextFormat($h->phone) }}</td>
                     <td>{{ $h->type->name }}</td>
                     <td>{{ $h->quantity." ".$h->type->metrik }}</td>
-                    <td>{{ $h->neighborhood->name }}</td>
+                    <td>{{ $h->neighborhood }}</td>
                     <td>
                         {{ $h->street." ".$h->cty_name. " No:".$h->gate_no  }}
                     </td>
-                    <td>{{ $h->status->name }}</td>
+                        <td>
+                            @if($h->status->finisher == false and $h->status->id == 1)
+                                <h5><span class="badge badge-pill badge-success">{{ $h->status->name }}</span></h5>
+                            @elseif($h->status->finisher == true and $h->status->id == 5)
+                                <h5><span class="badge badge-pill badge-danger">{{ $h->status->name }}</span></h5>
+                            @elseif($h->status->finisher == false and $h->status->id != 1)
+                                <h5><span class="badge badge-pill badge-warning">{{ $h->status->name }}</span></h5>
+                            @elseif($h->status->finisher == true and $h->status->id != 5)
+                                <h5><span class="badge badge-pill badge-secondary">{{ $h->status->name }}</span></h5>
+                            @endif
+                        </td>
+
                   <td class="text-center">{{ date('d.m.Y', strtotime($h->created_at)) }}</td>
                         <td class="text-center">{{ date('d.m.Y', strtotime($h->updated_at)) }}</td>
                   <td class="text-center">
@@ -128,6 +133,7 @@
               </tbody>
               <tfoot>
               <tr>
+                  <th>#</th>
                   <th>Ad Soyad</th>
                   <th>Telefon</th>
                   <th>Yardım Türü</th>

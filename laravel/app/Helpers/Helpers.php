@@ -56,9 +56,9 @@ class Helpers{
     public static function getHelpTypes(){
         $hqb = HelpType::query();
         $hqb->select('id','name','slug','metrik');
-        $help = $hqb->get();
+        $helpTypes = $hqb->get();
 
-        return $help;
+        return $helpTypes;
 
     }
 

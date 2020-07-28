@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Yonetim;
 
 use Alert;
 use App\Models\DemandHelp;
+use App\Models\Person;
 use Helpers;
 use App\Models\Demand;
 use App\Models\Help;
@@ -449,13 +450,16 @@ class HelpController extends Controller
             $neighborhood = $nb->name;
             $buttonControl = false;
 
+            $person = Person::where('phone','=',Helpers::convertToIntPhone($request->phone))->get();
+
             return view('yonetim.helps.ekle_dogrula')->with([
                 'helpListOnControl' => $helpListOnControl,
                 'helpList' => $helpList,
                 'helpTypes' => $helpTypes,
                 'request' => $request,
                 'neighborhood' => $neighborhood,
-                'buttonControl' => $buttonControl
+                'buttonControl' => $buttonControl,
+                'person' => $person[0]
             ]);
         }
 
@@ -464,9 +468,14 @@ class HelpController extends Controller
     }
 
     public function showWithPhoneAndHelpType($phone,$helpTypeId){
+
         $hqb = Help::query();
-        $hqb->where('help_types_id','=',$helpTypeId);
-        $hqb->where('phone','=',$phone);
+        $hqb->join('demand_help','helps.id','demand_help.help_id');
+        $hqb->join('demands','demands.id','demand_help.demand_id');
+        $hqb->join('people','people.id','demands.person_id');
+        $hqb->where('people.phone','=',$phone);
+        $hqb->where('helps.help_types_id','=',$helpTypeId);
+        $hqb->select('helps.*');
         $help = $hqb->get();
 
         return $help;
@@ -477,8 +486,11 @@ class HelpController extends Controller
         if ($phone == 1111111111)
           return false;
         $hqb = Help::query();
-        $hqb->where('phone','=',$phone);
-        $hqb->where('help_types_id','=',$typeId);
+        $hqb->join('demand_help','helps.id','demand_help.help_id');
+        $hqb->join('demands','demands.id','demand_help.demand_id');
+        $hqb->join('people','people.id','demands.person_id');
+        $hqb->where('people.phone','=',$phone);
+        $hqb->where('helps.help_types_id','=',$typeId);
         $count = $hqb->count();
 
         if ($count>0)
@@ -496,48 +508,65 @@ class HelpController extends Controller
 
     protected function addHelps($request, $helpTypes)
     {
-        $first_name = $request->first_name;
-        $last_name = $request->last_name;
         $phone = Helpers::convertToIntPhone($request->phone);
-        $neighborhood_id = $request->neighborhood;
-        $street = $request->street;
+        $isPerson = Person::where('phone', '=',$phone)->get();
+        $personid = "";
+
+        if($isPerson->count() > 0) {
+            $personid = $isPerson[0]->id;
+        }else {
+            $person = new Person;
+            $person->first_name = $request->first_name;
+            $person->last_name = $request->last_name;
+            $person->person_slug = str_slug($request->first_name." ".$request->last_name);
+            $person->phone = Helpers::convertToIntPhone($request->phone);
+            if ($request->tc_no!=null)
+                $person->tc_no = $request->tc_no;
+
+            if ($request->email!=null)
+                $person->email = $request->email;
+
+
+            $person->neighborhood_id = $request->neighborhood;
+            $person->street = $request->street;
+
+            if ($request->city_name!=null){
+                $person->city_name = $request->city_name;
+                $address['city_name'] = $request->city_name;
+            }
+
+            if ($request->gate_no!=null){
+                $person->gate_no = $request->gate_no;
+                $address['gate_no'] = $request->gate_no;
+            }
+
+            $person->save();
+
+            $address['neighborhood'] = $person->neighborhood->name;
+
+            $personid = $person->id;
+        }
+
+        $demand = new Demand;
+        $demand->person_id = $personid;
+
+        if ($request->detail!=null){
+            $demand->detail = $request->detail;
+        }
+
+        $demand->save();
 
         $okHelpList = [];
 
-        // TODO: REFACTOR EDİLECEK KAYIT METHODU YAZILACAK KOD GÖRÜNÜMÜ DÜZELTİLECEK
         foreach ($helpTypes as $h){
             if ($request[$h->slug]!=null) {
                 $help = new Help;
-                $help->first_name = $first_name;
-                $help->last_name = $last_name;
-                $help->person_slug = str_slug($first_name." ".$last_name);
-                $help->phone = $phone;
-                $help->neighborhood_id = $neighborhood_id;
-                $help->street = $street;
                 $help->help_types_id = $h->id;
                 $help->status_id = 1;
                 $help->quantity = $request[$h->slug];
 
-                if ($request->tc_no!=null)
-                    $help->tc_no = $request->tc_no;
-
-                if ($request->email!=null)
-                    $help->email = $request->email;
-
-                if ($request->city_name!=null){
-                    $help->city_name = $request->city_name;
-                    $address['city_name'] = $request->city_name;
-                }
-                if ($request->gate_no!=null){
-                    $help->gate_no = $request->gate_no;
-                    $address['gate_no'] = $request->gate_no;
-                }
-                if ($request->detail!=null){
-                    $help->detail = $request->detail;
-                }
                 if ($help->save()){
-                    array_push($okHelpList,"$help->id");
-                    $address['neighborhood'] = $help->neighborhood->name;
+                    array_push($okHelpList,$help->id);
                     Helpers::activity('Yardım talebi eklendi.','ekledi');
                 }
 
@@ -545,38 +574,22 @@ class HelpController extends Controller
 
         }
 
-        return DemandController::store($phone,json_encode($okHelpList));
+        return DemandController::store($demand,$okHelpList);
 
     }
 
     public function addSuccess($id)
     {
 
-        $demand = DemandController::show($id);
-        $helpId = json_decode($demand->helps);
-        $phone = $demand->phone;
-        $date = $demand->created_at;
-        $helpList = [];
-        $full_name = "";
-        $address = "";
-        $detail = "";
+        $demand = Demand::findOrFail($id);
 
-        foreach ($helpId as $h){
-            $help = Help::findOrFail($h);
-            array_push($helpList,$help);
-            $full_name = $help->full_name;
-            $address = $help->address;
-            $detail = $help->detail;
-        }
-
-        return view('yonetim.helps.success')->with([
+        return view('yonetim.demands.details')->with([
             'demand_no' => $demand->id,
-            'phone' => Helpers::phoneTextFormat($phone),
-            'full_name' => $full_name,
-            'helpList' => $helpList,
-            'date' => $date,
-            'address' => $address,
-            'detail' => $detail
+            'phone' => Helpers::phoneTextFormat($demand->person->phone),
+            'full_name' => $demand->person->full_name,
+            'helpList' => $demand->helps,
+            'address' => $demand->person->address,
+            'detail' => $demand->detail
         ]);
     }
 
@@ -695,22 +708,21 @@ class HelpController extends Controller
     }
 
     public function copyHelpInfo($id){
+
         $help = Help::find($id);
-        $hqb = HelpType::query();
-        $hqb->select('id','name','slug','metrik');
-        $hqb->orderBy('name','asc');
-        $helpTypes = $hqb->get();
+
+        $helpTypes = Helpers::getHelpTypes();
 
         return view('yonetim.helps.ekle_kopyala')->with([
-            'first_name' => $help->first_name,
-            'last_name' => $help->last_name,
-            'phone' => $help->phone,
-            'tc_no' => $help->tc_no,
-            'email' => $help->email,
-            'neighborhood_id' => $help->neighborhood_id,
-            'street' => $help->street,
-            'city_name' => $help->city_name,
-            'gate_no' => $help->gate_no,
+            'first_name' => $help->demandHelp->demand->person->first_name,
+            'last_name' => $help->demandHelp->demand->person->last_name,
+            'phone' => $help->demandHelp->demand->person->phone,
+            'tc_no' => $help->demandHelp->demand->person->tc_no,
+            'email' => $help->demandHelp->demand->person->email,
+            'neighborhood_id' => $help->demandHelp->demand->person->neighborhood_id,
+            'street' => $help->demandHelp->demand->person->street,
+            'city_name' => $help->demandHelp->demand->person->city_name,
+            'gate_no' => $help->demandHelp->demand->person->gate_no,
             'helpTypes' => $helpTypes
 
         ]);

@@ -42,7 +42,10 @@
                             <div class="row">
                                 <div class="col-md-7">
                                     <div class="col-md-12">
-                                        <span class="text-black text-bold font-size-2"><h2>{{ $request->first_name." ".$request->last_name }}</h2></span>
+                                        <span class="text-black text-bold font-size-2">
+                                            <h2>{{ $request->first_name." ".$request->last_name }}</h2>
+                                             Bu telefon numarası ile daha önce istek yapan kişi<h4>{{ $person->full_name }}</h4>
+                                        </span>
                                     </div>
                                     <div class="col-md-12">
                                         <span class="text-black-50 text-bold font-size-2"><h4>Tel: {{ $request->phone }}</h4></span>

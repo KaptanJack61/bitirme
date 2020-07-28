@@ -53,6 +53,7 @@
                   <th>Cadde & Sokak</th>
                 <th class="text-center">K. Tarihi</th>
                   <th class="text-center">Son İşlem Tar.</th>
+                  <th>Durum</th>
                 <th class="text-right">İşlemler</th>
               </tr>
               </thead>
@@ -67,6 +68,15 @@
                    <td>{{ $address }}</td>
                    <td class="text-center">{{ date('d.m.Y', strtotime($demand->created_at)) }}</td>
                    <td class="text-center">{{ date('d.m.Y', strtotime($demand->updated_at)) }}</td>
+
+                   @if ($closed == $count)
+                       <td><h5><span class="badge badge-pill badge-secondary">Tamamlandı</span></h5></td>
+                   @elseif ($open == $count)
+                       <td><h5><span class="badge badge-pill badge-success">İşleme Alındı</span></h5></td>
+                   @else
+                       <td><h5><span class="badge badge-pill badge-warning">{{ $closed }} Adet Tamamlandı</span></h5></td>
+                   @endif
+
                    <td class="text-right">
                        <a id="duzenle" href="{{route('yardimtalebi.all.updateIndex',['id'=>$demand->id])}}" class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Düzenle">
                            <i class="fa fa-edit"></i>
@@ -92,6 +102,7 @@
                   <th>Cadde & Sokak</th>
                   <th class="text-center">K. Tarihi</th>
                   <th class="text-center">Son İşlem Tar.</th>
+                  <th>Durum</th>
                   <th class="text-right">İşlemler</th>
               </tr>
               </tfoot>
