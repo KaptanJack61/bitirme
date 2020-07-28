@@ -175,13 +175,13 @@ class DemandController extends Controller
                           >
                               <i class="fa fa-edit"></i>
                           </a>
-
-                          <a id="sil" href='.route('yardimtalebi.all.destroy',  ['id' => $demand->id]).' 
-                                        class="btn btn-danger btn-sm"
-                                        data-toggle="tooltip" data-placement="top" title="Sil" 
-                          >
+                          
+                          <a id="sil" href="#" class="btn btn-danger btn-sm" 
+                                        data-toggle="modal" 
+                                        data-target="#deleted"
+                                        data-demandid="'.$demand->id.'">
                               <i class="fa fa-trash"></i>
-                          </a>
+                          </a> 
                           
                           <a id="goruntule" href='.route('yardimtalebi.all.detail',  ['id' => $demand->id]).' 
                                         class="btn btn-primary btn-sm"
@@ -212,26 +212,73 @@ class DemandController extends Controller
 
     public function destroy($id){
         $demand = Demand::find($id);
-        $helpIdList = json_decode($demand->helps);
 
-        if ($this->controlCompletedHelps($helpIdList,true) == true){
-            Alert::error('Hata','Bu talepteki tüm yardımlar tamamlandığından silemezsiniz.');
-            return redirect()->back();
+        $demandHelp = DemandHelp::where('demand_id','=', $id)->get();
+
+        $countClosed = 0;
+        $countOpen = 0;
+        $helpList = [];
+
+        foreach ($demandHelp as $dh) {
+            if($dh->help->status->finisher == true){
+                $countClosed++;
+            }else {
+                $countOpen++;
+                array_push($helpList, $dh->help->id);
+            }
+
         }
 
-        if ($this->controlCompletedHelps($helpIdList,false) == true ){
-            $deleteHelps = $this->deleteHelps($helpIdList);
-            $this->deleteDemandInHelpsList($deleteHelps);
+
+        if ($countClosed == 0) {
+
+            $person = $demand->person;
+            $demand->helps()->detach($helpList);
+
+            if ($demand->delete()) {
+
+                foreach ($helpList as $hid) {
+                    $help = Help::find($hid);
+                    $help->delete();
+                }
+
+                $countDemands = Demand::where('person_id','=', $person->id)->count();
+
+                if ($countDemands == 0)
+                    $person->delete();
+
+                Alert::success('Başarılı', 'Talep ve içerisinde ki tüm yardımlar silindi.');
+                return redirect()->route('yardimtalepleri.demands');
+
+            }else {
+
+                $demand->helps()->attach($helpList);
+                Alert::warning('Hata', 'Yardım Talebi silinemedi.');
+                return redirect()->route('yardimtalepleri.demands');
+            }
+
+
+
+        }else if($countOpen === 0) {
+
+            Alert::error('Hata','Bu talepteki tüm yardımlar tamamlandığından silemezsiniz.');
+            return redirect()->back();
+
+        }else {
+
+            $demand->helps()->detach($helpList);
+
+            foreach ($helpList as $hid) {
+                $help = Help::find($hid);
+                $help->delete();
+            }
+
             Alert::warning('Kısmen Başarılı', 'Talep içerisinde tamamlanmayan yardımlar silindi.');
             return redirect()->back();
 
         }
 
-        $this->deleteHelps($helpIdList);
 
-        $demand->delete();
-        Alert::success('Başarılı', 'Talep ve içerisindeki yardımlar silndi.');
-        return redirect()->back();
     }
 
     public function deleteDemandInHelpsList($deleteHelps){
@@ -327,44 +374,30 @@ class DemandController extends Controller
 
     public function detail($id)
     {
-        $demand = $this::show($id);
-        $helpId = json_decode($demand->helps);
-        $phone = $demand->phone;
-        $date = $demand->created_at;
-        $helpList = [];
-        $full_name = "";
-        $address = "";
-        $detail = "";
 
-        foreach ($helpId as $h){
-            $help = Help::findOrFail($h);
-            array_push($helpList,$help);
-            $full_name = $help->full_name;
-            $address = $help->address;
-            $detail = $help->detail;
-        }
+        $demand = Demand::findOrFail($id);
 
         return view('yonetim.demands.details')->with([
             'demand_no' => $demand->id,
-            'phone' => Helpers::phoneTextFormat($phone),
-            'full_name' => $full_name,
-            'helpList' => $helpList,
-            'date' => $date,
-            'address' => $address,
-            'detail' => $detail
+            'phone' => Helpers::phoneTextFormat($demand->person->phone),
+            'full_name' => $demand->person->full_name,
+            'helpList' => $demand->helps,
+            'address' => $demand->person->address,
+            'detail' => $demand->detail
         ]);
     }
 
     public function editAllInputForm($id){
 
-        $demand = Demand::findOrFail($id);
-        $helpsIdList = json_decode($demand->helps);
+        $demandhelp = DemandHelp::where('demand_id','=',$id)->get();
+        //dd($demandhelp);
+        //$helpsIdList = json_decode($demand->helps);
 
-        foreach ($helpsIdList as $helpId){
-            $help = Help::find($helpId);
+        foreach ($demandhelp as $dh){
+            $help = Help::find($dh->help_id);
 
             if ($help!=null) {
-                $help->quantity = (int)Request::get($helpId);
+                $help->quantity = (int)Request::get($dh->help_id);
                 $help->save();
             }
 
@@ -378,35 +411,14 @@ class DemandController extends Controller
     public function updateIndex($id){
 
         $demand = Demand::findOrFail($id);
-        $helpIdList = json_decode($demand->helps);
-
+        $helpIdList = [];
         $slug_list = [];
-        $first_name = "";
-        $last_name = "";
-        $tc_no = "";
-        $email = "";
-        $neighborhood_id = "";
-        $street = "";
-        $city_name = "";
-        $gate_no = "";
-        $detail = "";
 
-        foreach ($helpIdList as $helpId){
-            $help = Help::find((int)$helpId);
-            if ($help != null) {
-                array_push($slug_list,$help->type->slug);
-                $first_name = $help->first_name;
-                $last_name = $help->last_name;
-                $tc_no = $help->tc_no;
-                $email = $help->email;
-                $neighborhood_id = $help->neighborhood_id;
-                $street = $help->street;
-                $city_name = $help->city_name;
-                $gate_no = $help->gate_no;
-                $detail = $help->detail;
-            }
+        $helps = $demand->helps;
 
-
+        foreach ($helps as $help) {
+            array_push($helpIdList, $help->id);
+            array_push($slug_list, $help->type->slug);
         }
 
         $helpTypes = Helpers::getHelpTypes();
@@ -415,15 +427,6 @@ class DemandController extends Controller
             'demand' => $demand,
             'helpIdList' => $helpIdList,
             'helpTypes' => $helpTypes,
-            'first_name' => $first_name,
-            'last_name' => $last_name,
-            'tc_no' => $tc_no,
-            'email' => $email,
-            'neighborhood_id' => $neighborhood_id,
-            'street' => $street,
-            'city_name' => $city_name,
-            'gate_no' => $gate_no,
-            'detail' => $detail,
             'slug_list' =>$slug_list
         ]);
 
@@ -431,7 +434,14 @@ class DemandController extends Controller
 
     public function update($id){
         $demand = Demand::find($id);
-        $helpIdList = json_decode($demand->helps);
+        $person = $demand->person;
+        $helpIdList = [];
+
+        $helps = $demand->helps;
+
+        foreach ($helps as $help) {
+            array_push($helpIdList, $help->id);
+        }
 
         $helpTypes = Helpers::getHelpTypes();
 
@@ -446,19 +456,36 @@ class DemandController extends Controller
         $email = Request::get('email');
         $detail = Request::get('detail');
 
-        $requestFullList = [];
-        $requestEmptyList = [];
-        $demandTypeList = [];
-        $otherDeleteList = [];
+        $person->first_name = $first_name;
+        $person->last_name = $last_name;
+        $person->person_slug = str_slug($first_name." ".$last_name);
+        $person->phone = $phone;
+        $person->tc_no = $tc_no;
+        $person->email = $email;
+        $person->neighborhood_id = $neighborhood_id;
+        $person->street = $street;
+        $person->city_name = $city_name;
+        $person->gate_no = $gate_no;
+        $person->save();
+
+        $demand->detail = $detail;
+        $demand->save();
+
+        $requestFullList = []; // Dolu typler
+        $requestEmptyList = []; // Boş typler
+        $demandTypeList = []; // Talepteki type list
+        $deleteList = []; //
         $newList = [];
 
         foreach ($helpTypes as $ht){
-            if (Request::get($ht->slug)!=""){
+            if (Request::get($ht->slug) != ""){
                 array_push($requestFullList,$ht->slug);
             }else{
                 array_push($requestEmptyList,$ht->slug);
             }
         }
+
+
 
         foreach ($helpIdList as $hi){
             $help = Help::find($hi);
@@ -466,48 +493,26 @@ class DemandController extends Controller
                 array_push($demandTypeList,$help->type->slug);
         }
 
+        //dd("request full list", $requestFullList, "request empty list", $requestEmptyList, "demand önceki list", $demandTypeList);
+
         foreach ($helpIdList as $hi){
             foreach ($requestFullList as $rfl){
                 $helpType = Helpers::getShowHelpTypeProperties($rfl,'slug');
                 $hti = $helpType[0]->id;
                 if (in_array($rfl,$demandTypeList) == true ){
-                    $help = Help::find((int)$hi);
+                    $help = Help::find($hi);
                     if ($help != null and $help->type->slug == $rfl){
-                        $help->first_name = $first_name;
-                        $help->last_name = $last_name;
-                        $help->person_slug = str_slug($first_name." ".$last_name);
-                        $help->phone = $phone;
-                        $help->tc_no = $tc_no;
-                        $help->email = $email;
-                        $help->neighborhood_id = $neighborhood_id;
-                        $help->street = $street;
-                        $help->city_name = $city_name;
-                        $help->gate_no = $gate_no;
                         $help->help_types_id = $hti;
                         $help->quantity = Request::get($rfl);
-                        $help->detail = $detail;
                         $help->save();
-                        array_push($newList,(string)$help->id);
                     }
                 }else{
                     $help = new Help;
-                    $help->first_name = $first_name;
-                    $help->last_name = $last_name;
-                    $help->person_slug = str_slug($first_name." ".$last_name);
-                    $help->phone = $phone;
-                    $help->tc_no = $tc_no;
-                    $help->email = $email;
-                    $help->neighborhood_id = $neighborhood_id;
-                    $help->street = $street;
-                    $help->city_name = $city_name;
-                    $help->gate_no = $gate_no;
                     $help->help_types_id = $hti;
                     $help->status_id = 1;
                     $help->quantity = Request::get($rfl);
-                    $help->detail = $detail;
                     $help->save();
-                    array_push($newList,(string)$help->id);
-                    array_push($demandTypeList,$help->type->slug);
+                    array_push($newList,$help->id);
                 }
             }
         }
@@ -516,9 +521,9 @@ class DemandController extends Controller
             foreach ($helpIdList as $hi) {
                 foreach ($requestEmptyList as $rel) {
                     if (in_array($rel,$demandTypeList) == true ){
-                        $help = Help::find((int)$hi);
+                        $help = Help::find($hi);
                         if ($help != null and $help->type->slug == $rel){
-                            array_push($otherDeleteList,$help->id);
+                            array_push($deleteList,$help->id);
                             $help->delete();
                         }
 
@@ -528,9 +533,17 @@ class DemandController extends Controller
             }
         }
 
-        $demand->phone = $phone;
-        $demand->helps = json_encode($newList);
-        $demand->save();
+        //dd("new List", $newList, "deleteList", $deleteList);
+
+        if ($newList != null) {
+            $demand->helps()->attach($newList);
+        }
+
+        if ($deleteList != null) {
+            $demand->helps()->detach($deleteList);
+        }
+
+        dd("new list", $newList, "deleteList", $deleteList);
 
         Alert::success("Başarılı","Yardım talebi güncellendi.");
         return redirect()->route('yardimtalebi.all.detail',['id' => $id]);

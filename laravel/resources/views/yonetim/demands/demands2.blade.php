@@ -71,6 +71,8 @@
 <br /><br /><br /><br />
 @stop
 
+@include('yonetim.demands.modal')
+
 @section('script')
 <script src="/js/plugins/datatables/jquery.dataTables.js"></script>
 <script src="/js/plugins/datatables/dataTables.bootstrap4.js"></script>
@@ -79,7 +81,7 @@
         processing: true,
         serverSide: true,
         ajax : '{{ route('yardimtalepleri.getDemands') }}',
-        order: [[ 7, "desc" ]],
+        order: [[ 0, "desc" ]],
         columns: [
             { data: 'id', name:'id'},
             { data: 'DT_RowData.full_name', name:'people.first_name'},
@@ -180,6 +182,23 @@
 
     editer.init();
     deleter.init();
+
+    $('#deleted').on('show.bs.modal', function(event) {
+        var button1 = $(event.relatedTarget) // Button that triggered the modal
+        // Extract info from data-* attributes
+        var demandid = button1.data('demandid')
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+
+        $('#delete').append("<a href='/yardimtalebi/sil/"+ demandid +"' type='button' id='deleteok' class='btn btn-primary'>" +
+            "<i class='fa fa-check'> </i> Evet Silmek İstiyorum</a>"
+        );
+    })
+
+    $( "#deletecancel" ).click(function() {
+        $( "#deleteok" ).remove();
+
+    });
 </script>
 
 

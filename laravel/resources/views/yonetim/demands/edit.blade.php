@@ -57,7 +57,7 @@
                                                        tabindex="0"
                                                        onkeypress="return isNumericKey(event)"
                                                        @if(is_null(old('first_name')))
-                                                       value="{{ $first_name }}"
+                                                       value="{{ $demand->person->first_name }}"
                                                        @else
                                                        value="{{ old('first_name') }}"
                                                        @endif
@@ -78,7 +78,7 @@
                                                        tabindex="0"
                                                        onkeypress="return isNumericKey(event)"
                                                        @if(is_null(old('last_name')))
-                                                       value="{{ $last_name }}"
+                                                       value="{{ $demand->person->last_name }}"
                                                        @else
                                                        value="{{ old('last_name') }}"
                                                        @endif
@@ -106,7 +106,7 @@
                                                        maxlength="11"
                                                        minlength="11"
                                                        @if(is_null(old('tc_no')))
-                                                       value="{{ $tc_no }}"
+                                                       value="{{ $demand->person->tc_no }}"
                                                        @else
                                                        value="{{ old('tc_no') }}"
                                                         @endif
@@ -136,7 +136,7 @@
                                                        minlength="10"
                                                        maxlength="11"
                                                        @if(is_null(old('phone')))
-                                                       value="{{ $demand->phone }}"
+                                                       value="{{ $demand->person->phone }}"
                                                        @else
                                                        value="{{ old('phone') }}"
                                                         @endif
@@ -165,7 +165,7 @@
                                                        placeholder="ornek@serdivan.bel.tr"
                                                        tabindex="0"
                                                        @if(is_null(old('email')))
-                                                       value="{{ $email }}"
+                                                       value="{{ $demand->person->email }}"
                                                        @else
                                                        value="{{ old('email') }}"
                                                         @endif
@@ -222,17 +222,17 @@
                                                 <option value="0" selected>Mahalle seçiniz</option>
                                                 @foreach($neighborhoods as $n)
                                                     @if(is_null(old('neigborhood')))
-                                                        @if ($n->id == $neighborhood_id )
-                                                            <option value="{{ $neighborhood_id }}" selected>{{ $n->name }} Mah.</option>
+                                                        @if ($n->id == $demand->person->neighborhood->id )
+                                                            <option value="{{ $demand->person->neighborhood->id }}" selected>{{ $n->name }} Mah.</option>
                                                         @else
-                                                            <option value="{{ $neighborhood_id }}">{{ $n->name }} Mah.</option>
+                                                            <option value="{{ $demand->person->neighborhood->id }}">{{ $n->name }} Mah.</option>
                                                         @endif
 
                                                     @else
-                                                        @if (old('neighborhood') == $neighborhood_id )
-                                                            <option value="{{ $neighborhood_id }}" selected>{{ $n->name }} Mah.</option>
+                                                        @if (old('neighborhood') == $demand->person->neighborhood->id )
+                                                            <option value="{{ $demand->person->neighborhood->id }}" selected>{{ $n->name }} Mah.</option>
                                                         @else
-                                                            <option value="{{ $neighborhood_id }}">{{ $n->name }} Mah.</option>
+                                                            <option value="{{ $demand->person->neighborhood->id }}">{{ $n->name }} Mah.</option>
                                                         @endif
                                                     @endif
                                                 @endforeach
@@ -252,7 +252,7 @@
                                                    placeholder="Yıldız Sokak"
                                                    tabindex="0"
                                                    @if(is_null(old('street')))
-                                                    value="{{ $street }}"
+                                                    value="{{ $demand->person->street }}"
                                                    @else
                                                    value="{{ old('street') }}"
                                                    @endif
@@ -272,7 +272,7 @@
                                                    placeholder="Yaşam Sitesi"
                                                    tabindex="0"
                                                    @if(is_null(old('city_name')))
-                                                   value="{{ $city_name }}"
+                                                   value="{{ $demand->person->city_name }}"
                                                    @else
                                                    value="{{ old('city_name') }}"
                                                     @endif
@@ -292,7 +292,7 @@
                                                    placeholder="8B"
                                                    tabindex="0"
                                                    @if(is_null(old('gate_no')))
-                                                   value="{{ $gate_no }}"
+                                                   value="{{ $demand->person->gate_no }}"
                                                    @else
                                                    value="{{ old('gate_no') }}"
                                                     @endif
@@ -304,7 +304,7 @@
                                 <div class="col-md-12" style="margin-top: 10px;">
                                     <label for="exampleInputPassword1">Açıklama</label>
                                     <div class="form-group">
-                                            <textarea id="detail" class="form-control" name="detail" style="width: 100%">@if(is_null(old('detail'))){{ $detail }}@else{{ old('detail') }}@endif
+                                            <textarea id="detail" class="form-control" name="detail" style="width: 100%">@if(is_null(old('detail'))){{ $demand->detail }}@else{{ old('detail') }}@endif
                                             </textarea>
                                     </div>
                                     <!-- /.card -->

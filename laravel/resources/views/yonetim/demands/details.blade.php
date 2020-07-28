@@ -104,16 +104,15 @@
                                             <th class="text-center" style="width: 60px">#</th>
                                             <th style="width: 150px">Yardım Türü</th>
                                             <th>Miktar</th>
-                                            <th style="width: auto">Durum</th>
+                                            <th style="width: 150px;">Kayıt Tarihi</th>
+                                            <th style="width: 150px;">Son İşlem Tarihi</th>
+                                            <th style="width: 150px">Durum</th>
                                             <th class="text-right islemler" style="width: 150px;">İşlemler</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        @foreach($helpList as $h) @if ($h->status->finisher == true)
-                                            <tr style="background-color: #00cc66">
-                                        @else
+                                        @foreach($helpList as $h)
                                             <tr>
-                                                @endif
                                                 <td class="text-center">{{ $h->id }}</td>
                                                 <td>{{ $h->type->name }}</td>
                                                 <td class="align-items-center">
@@ -130,9 +129,22 @@
                                                     </div>
                                                     @endif
                                                 </td>
+                                                <td>{{ date('d.m.Y', strtotime($h->created_at)) }}</td>
+                                                <td>{{ date('d.m.Y', strtotime($h->updated_at)) }}</td>
                                                 <td>
-                                                    <span id="miktar">{{ $h->status->name }}</span>
+                                                    @if($h->status->finisher == false and $h->status->id == 1)
+                                                        <h5><span class="badge badge-pill badge-success">{{ $h->status->name }}</span></h5>
+                                                    @elseif($h->status->finisher == true and $h->status->id == 5)
+                                                        <h5><span class="badge badge-pill badge-danger">{{ $h->status->name }}</span></h5>
+                                                    @elseif($h->status->finisher == false and $h->status->id != 1)
+                                                        <h5><span class="badge badge-pill badge-warning">{{ $h->status->name }}</span></h5>
+                                                    @elseif($h->status->finisher == true and $h->status->id != 5)
+                                                        <h5><span class="badge badge-pill badge-secondary">{{ $h->status->name }}</span></h5>
+                                                    @endif
                                                 </td>
+
+
+
 
                                                 <td class="text-center islemler">
                                                     @if ($h->status->finisher == false)
@@ -170,6 +182,8 @@
                                             <th>Yardım Türü</th>
                                             <th>Miktar</th>
                                             <th>Durum</th>
+                                            <th>Kayıt Tarihi</th>
+                                            <th>Son İşlem Tarihi</th>
                                             <th class="text-center islemler">İşlemler</th>
                                         </tr>
                                         </tfoot>
@@ -192,7 +206,9 @@
     <br/>
     <br/>
     <br/>
-    <br/> @include('yonetim.demands.modal') @stop @section('script')
+    <br/>
+    @include('yonetim.demands.modal')
+    @stop @section('script')
     <script src="/js/plugins/datatables/jquery.dataTables.js"></script>
     <script src="/js/plugins/datatables/dataTables.bootstrap4.js"></script>
     <script>
@@ -406,6 +422,27 @@
 
 
     </script>
+
+    <script type="text/javascript">
+        $('#deleted').on('show.bs.modal', function(event) {
+            var button1 = $(event.relatedTarget) // Button that triggered the modal
+            // Extract info from data-* attributes
+            var demandid = button1.data('demandid')
+            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+
+            $('#delete').append("<a href='/yardimtalebi/sil/"+ demandid +"' type='button' id='deleteok' class='btn btn-primary'>" +
+                "<i class='fa fa-check'> </i> Evet Silmek İstiyorum</a>"
+            );
+        })
+
+        $( "#deletecancel" ).click(function() {
+            $( "#deleteok" ).remove();
+
+        });
+    </script>
+
+
     <script>
         function isNumberKey(evt) {
             var charCode = (evt.which) ? evt.which : evt.keyCode;

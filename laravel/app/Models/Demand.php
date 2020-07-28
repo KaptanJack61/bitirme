@@ -14,4 +14,8 @@ class Demand extends Model
         return $this->belongsTo('App\Models\Person');
     }
 
+    public function demandHelp() {
+        return $this->hasOne('App\Models\DemandHelp');
+    }
+
 }

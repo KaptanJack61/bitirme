@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Yonetim;
 
 use Alert;
+use App\Models\DemandHelp;
 use Helpers;
 use App\Models\Demand;
 use App\Models\Help;
@@ -590,50 +591,37 @@ class HelpController extends Controller
         }
 
         $help = Help::findOrFail($id);
+
         if ($help->status->finisher == true) {
             Alert::error('Hata','Kapatılmış yardım talebinini silemezsiniz.');
             return redirect()->back();
         }
 
-        $dqb = Demand::query();
-        $dqb->whereJsonContains('helps',$id);
-        $demand = $dqb->get();
-
-        if (count($demand)<1){
-            $delete = $help->delete();
-            if ($delete){
-                Helpers::activity('Yapılan yardımı sildi','yardımı sildi');
-                Alert::success('Başarılı','Yardım başarıyla silindi.');
-                return redirect()->back();
-            }else{
-                Alert::error('Hata','Yardım silinemedi.');
-                return redirect()->back();
-            }
+        $demand = "";
+        foreach($help->demand as $demands) {
+            $demand = $demands;
         }
 
-        $helpList = json_decode($demand[0]->helps);
-        $recoveryList = $helpList;
-        $newList = [];
 
-        foreach ($helpList as $h){
-            if ($id != $h){
-                array_push($newList,$h);
-            }
-        }
+        if ($help->delete()) {
 
-        $updateDemand = DemandController::updateByHelpController($demand[0]->id,json_encode($newList));
+            $demand->helps()->detach($help);
+            $helpCount = DemandHelp::where('demand_id','=',$demand->id)->count();
 
-        if ($updateDemand){
-            $delete = Help::findOrFail($id)->delete();
-            if ($delete){
+            if ($helpCount === 0) {
+                $person = $demand->person;
+                $demand->delete();
+                $person->delete();
+
                 Helpers::activity('Yapılan yardım silindi','sildi');
                 Alert::success('Başarılı','Yardım başarıyla silindi.');
-                return redirect()->back();
-            }else{
-                $updateDemand = DemandController::updateByHelpController($demand[0]->id,json_encode($recoveryList));
-                Alert::error('Hata','Yardım silinemedi.');
-                return redirect()->back();
+                return redirect()->route('yardimtalepleri.demands');
+
             }
+
+            Helpers::activity('Yapılan yardım silindi','sildi');
+            Alert::success('Başarılı','Yardım başarıyla silindi.');
+            return redirect()->back();
         }
 
     }
@@ -643,11 +631,20 @@ class HelpController extends Controller
         //dd($request->all());
         $help = Help::findOrFail($request->helpId);
         $help->status_id = $request->helpType;
-        $help->detail = $request->detail;
+
 
         if ($help->save()){
             Helpers::activity('Yapılan yardım durumu değiştirildi',$help->status->name." olarak değiştirdi.");
             Alert::success("Başarılı","Yardım başarıyla kapatıldı.");
+            if ($request->detail != null) {
+                $demandhelp = DemandHelp::where('help_id','=',$request->helpId)->get();
+                foreach ($demandhelp as $dh){
+                    $demand = Demand::findOrFail($dh->demand_id);
+                    $demand->detail = $request->detail;
+                    $demand->save();
+                }
+            }
+
             return redirect()->back();
         }else {
             Alert::error('Hata','Yardım kapatılamadı.');
@@ -659,21 +656,40 @@ class HelpController extends Controller
 
         //dd($request->all());
         $help = Help::findOrFail($request->helpId);
-        $help->quantity = $request->quantity;
-        $help->status_id = $request->status;
-        $help->neighborhood_id = $request->neighborhood;
-        $help->street = $request->street;
-        $help->city_name = $request->city_name;
-        $help->gate_no = $request->gate_no;
-        $help->help_types_id = $request->helpType;
+        $person = "";
+        foreach($help->demand as $demand) {
+            $person = $demand->person;
+        }
 
-        if ($help->save()){
-            Helpers::activity('Yapılan yardımı güncelledi.',$help->id." nolu yardımı güncelledi");
-            Alert::success('Başarılı','Yardım başarıyla güncellendi.');
-            return redirect()->back();
+
+        $person->neighborhood_id = $request->neighborhood;
+        $person->street = $request->street;
+        $person->city_name = $request->city_name;
+        $person->gate_no = $request->gate_no;
+
+        if ($person->save()) {
+            $help->help_types_id = $request->helpType;
+            $help->status_id = $request->status;
+            $help->quantity = $request->quantity;
+
+            if ($help->save()){
+                Helpers::activity('Yapılan yardımı güncelledi.',$help->id." nolu yardımı güncelledi");
+                Alert::success('Başarılı','Yardım başarıyla güncellendi.');
+                return redirect()->back();
+            }else {
+                Alert::error('Hata','Adres Bilgileri güncellendi.');
+                return redirect()->back();
+            }
+
         }else {
-            Alert::error('Hata','Yardım güncellenemedi.');
-            return redirect()->back();
+            if ($help->save()){
+                Helpers::activity('Yapılan yardımı güncelledi.',$help->id." nolu yardımı güncelledi");
+                Alert::error('Hata','Adres Bilgileri güncellenemedi.');
+                return redirect()->back();
+            }else {
+                Alert::error('Hata','Yardım güncellenemedi.');
+                return redirect()->back();
+            }
         }
 
     }
