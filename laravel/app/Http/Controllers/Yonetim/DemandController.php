@@ -435,15 +435,9 @@ class DemandController extends Controller
     public function update($id){
         $demand = Demand::find($id);
         $person = $demand->person;
-        $helpIdList = [];
+
 
         $helps = $demand->helps;
-
-        foreach ($helps as $help) {
-            array_push($helpIdList, $help->id);
-        }
-
-        $helpTypes = Helpers::getHelpTypes();
 
         $first_name = Request::get('first_name');
         $last_name = Request::get('last_name');
@@ -471,11 +465,18 @@ class DemandController extends Controller
         $demand->detail = $detail;
         $demand->save();
 
-        $requestFullList = []; // Dolu typler
-        $requestEmptyList = []; // Boş typler
-        $demandTypeList = []; // Talepteki type list
-        $deleteList = []; //
+        $requestFullList = [];
+        $requestEmptyList = [];
+        $demandTypeList = [];
+        $deleteList = [];
         $newList = [];
+
+
+        foreach ($helps as $help) {
+            array_push($demandTypeList,$help->type->slug);
+        }
+
+        $helpTypes = Helpers::getHelpTypes();
 
         foreach ($helpTypes as $ht){
             if (Request::get($ht->slug) != ""){
@@ -485,55 +486,39 @@ class DemandController extends Controller
             }
         }
 
+        foreach ($requestFullList as $rfl) {
 
-
-        foreach ($helpIdList as $hi){
-            $help = Help::find($hi);
-            if ($help != null)
-                array_push($demandTypeList,$help->type->slug);
-        }
-
-        //dd("request full list", $requestFullList, "request empty list", $requestEmptyList, "demand önceki list", $demandTypeList);
-
-        foreach ($helpIdList as $hi){
-            foreach ($requestFullList as $rfl){
-                $helpType = Helpers::getShowHelpTypeProperties($rfl,'slug');
-                $hti = $helpType[0]->id;
-                if (in_array($rfl,$demandTypeList) == true ){
-                    $help = Help::find($hi);
-                    if ($help != null and $help->type->slug == $rfl){
-                        $help->help_types_id = $hti;
+            if (in_array($rfl, $demandTypeList) == true) {
+                foreach ($helps as $help) {
+                    if ($help->type->slug == $rfl){
                         $help->quantity = Request::get($rfl);
                         $help->save();
                     }
-                }else{
-                    $help = new Help;
-                    $help->help_types_id = $hti;
-                    $help->status_id = 1;
-                    $help->quantity = Request::get($rfl);
-                    $help->save();
-                    array_push($newList,$help->id);
                 }
+            }else {
+                $h = new Help;
+                $helpType = Helpers::getShowHelpTypeProperties($rfl,'slug');
+                $hti = $helpType[0]->id;
+                $h->help_types_id = $hti;
+                $h->status_id = 1;
+                $h->quantity = Request::get($rfl);
+                $h->save();
+                array_push($newList,$h->id);
+
             }
         }
 
-        if (count($requestEmptyList) > 0){
-            foreach ($helpIdList as $hi) {
-                foreach ($requestEmptyList as $rel) {
-                    if (in_array($rel,$demandTypeList) == true ){
-                        $help = Help::find($hi);
-                        if ($help != null and $help->type->slug == $rel){
-                            array_push($deleteList,$help->id);
-                            $help->delete();
-                        }
-
+        foreach ($requestEmptyList as $rel) {
+            if (in_array($rel, $demandTypeList) == true) {
+                foreach ($helps as $help) {
+                    if ($help->type->slug == $rel){
+                        array_push($deleteList,$help->id);
+                        $help->delete();
                     }
-
                 }
             }
         }
 
-        //dd("new List", $newList, "deleteList", $deleteList);
 
         if ($newList != null) {
             $demand->helps()->attach($newList);
@@ -542,8 +527,6 @@ class DemandController extends Controller
         if ($deleteList != null) {
             $demand->helps()->detach($deleteList);
         }
-
-        dd("new list", $newList, "deleteList", $deleteList);
 
         Alert::success("Başarılı","Yardım talebi güncellendi.");
         return redirect()->route('yardimtalebi.all.detail',['id' => $id]);
