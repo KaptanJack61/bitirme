@@ -42,15 +42,6 @@
                   <p>Yardım Talebi Ekle</p>
                 </a>
               </li>
-
-                @if (Auth::guard('yonetim')->user()->admin)
-                    <li class="nav-item">
-                        <a href="{{route('raporlar.gunluk')}}" class="nav-link">
-                            <i class="fa fa-flag-checkered nav-icon" style="color: #00c0ef;"></i>
-                            <p>Günlük Rapor Al</p>
-                        </a>
-                @endif
-                </li>
             </ul>
           </li>
             @if (Auth::guard('yonetim')->user()->admin)
@@ -183,17 +174,6 @@
                                                     </a>
                                     </li>
                                 @endif
-                                <li class="nav-item">
-                                    @if(Session::get('menu_aktif')=='eskiyardimtalepleri')
-                                        <a href="{{route('eskiyardimtalepleri.index')}}" class="nav-link active">
-                                            @else
-                                                <a href="{{route('eskiyardimtalepleri.index')}}" class="nav-link">
-                                                    @endif
-
-                                                    <i class="fa fa-object-ungroup nav-icon"></i>
-                                                    <p>Eski Yardım Talebi Girişi</p>
-                                                </a>
-                                </li>
                             </ul>
                         </li>
 

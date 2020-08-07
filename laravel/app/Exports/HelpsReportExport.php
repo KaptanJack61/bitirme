@@ -23,8 +23,16 @@ class HelpsReportExport implements FromQuery, WithMapping, WithHeadings
         $last_date = Session::get('last_date');
 
         $data = Help::query();
-        $data->join('statuses','helps.status_id','=','statuses.id');
-        $data->select('helps.*');
+        $data->join('help_types','help_types.id','helps.help_types_id');
+        $data->join('statuses','helps.status_id','statuses.id');
+        $data->join('demand_help','demand_help.help_id','helps.id');
+        $data->join('demands','demands.id','demand_help.demand_id');
+        $data->join('people','people.id','demands.person_id');
+        $data->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+        $data->select('helps.*','help_types.name as type','help_types.metrik','people.first_name','people.last_name','people.city_name',
+            'people.street','people.gate_no','demands.detail','people.phone','neighborhoods.name as neighborhood',
+            'statuses.name as status'
+        );
 
         if ($status != "all") {
             if ($status == "open"){
@@ -39,12 +47,12 @@ class HelpsReportExport implements FromQuery, WithMapping, WithHeadings
         }
 
         if ($helptypes != "all"){
-            $data->whereIn('help_types_id',$helptypes);
+            $data->whereIn('helps.help_types_id',$helptypes);
 
         }
 
         if ($neighborhoods != "all") {
-            $data->whereIn('neighborhood_id',$neighborhoods);
+            $data->whereIn('people.neighborhood_id',$neighborhoods);
 
         }
 
@@ -63,7 +71,7 @@ class HelpsReportExport implements FromQuery, WithMapping, WithHeadings
             }
         }
 
-        $data->orderBy('helps.neighborhood_id');
+        $data->orderBy('people.neighborhood_id');
         $data->orderBy('helps.help_types_id');
         $data->orderBy('helps.created_at','desc');
 
@@ -80,11 +88,11 @@ class HelpsReportExport implements FromQuery, WithMapping, WithHeadings
     {
         return [
             $help->id,
-            $help->full_name,
+            $help->first_name." ".$help->last_name,
             Helpers::phoneTextFormat($help->phone),
-            $help->type->name,
-            $help->quantity." ".$help->type->metrik,
-            $help->neighborhood->name,
+            $help->type,
+            $help->quantity." ".$help->metrik,
+            $help->neighborhood,
             $help->street." ".$help->city_name." No: ".$help->gate_no,
             $help->status->name,
             date('d M Y',strtotime($help->created_at)),

@@ -1,6 +1,6 @@
 @extends('yonetim.layouts.master')
 
-@section('title','SBYM | '.config('app.name'))
+@section('title','SYTS | '.config('app.name'))
 
 @section('content')
 
@@ -43,7 +43,7 @@
                                 <div class="icon">
                                     <i class="fa fa-hands-helping"></i>
                                 </div>
-                                <a href="#" class="small-box-footer">Detaylı Bilgi <i class="fa fa-arrow-circle-right"></i></a>
+                                <a href="{{ route('yapilanyardimlar.index') }}" class="small-box-footer">Detaylı Bilgi <i class="fa fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
                         <!-- ./col -->
@@ -90,7 +90,7 @@
                             <div class="icon">
                                 <i class="fa fa-hand-paper"></i>
                             </div>
-                            <a href="#" class="small-box-footer">Detaylı Bilgi <i class="fa fa-arrow-circle-right"></i></a>
+                            <a href="{{ route('yapilanyardimlar.notCompletedHelps') }}" class="small-box-footer">Detaylı Bilgi <i class="fa fa-arrow-circle-right"></i></a>
                         </div>
                     </div>
                     <!-- ./col -->

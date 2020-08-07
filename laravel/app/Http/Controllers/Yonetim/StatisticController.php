@@ -37,8 +37,13 @@ class StatisticController extends Controller
 
             $q = Help::query();
             $q->join('statuses','helps.status_id','statuses.id');
+            $q->join('demand_help','demand_help.help_id','helps.id');
+            $q->join('demands','demands.id','demand_help.demand_id');
+            $q->join('people','people.id','demands.person_id');
+            $q->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
             $q->where('statuses.finisher','=',true);
-            $q->where('helps.neighborhood_id','=',$n->id);
+            $q->where('people.neighborhood_id','=',$n->id);
+
 
             $toplam = $q->count();
             $yuzde = $toplam * 100 / $sumHelps;
@@ -78,8 +83,11 @@ class StatisticController extends Controller
         foreach ($neighborhood as $n) {
             $q = Help::query();
             $q->join('statuses','helps.status_id','statuses.id');
+            $q->join('demand_help','demand_help.help_id','helps.id');
+            $q->join('demands','demands.id','demand_help.demand_id');
+            $q->join('people','people.id','demands.person_id');
             $q->where('statuses.finisher','=',true);
-            $q->where('helps.neighborhood_id','=',$n->id);
+            $q->where('peoples.neighborhood_id','=',$n->id);
 
             $toplam = $q->count();
             $yuzde = $toplam * 100 / $sumHelps;
@@ -247,9 +255,13 @@ class StatisticController extends Controller
         foreach ($helpTypes as $h) {
             $labels = [];
             foreach ($neighborhood as $n) {
+
                 $q = Help::query();
-                $q->where('neighborhood_id', '=', $n->id);
-                $q->where('help_types_id','=', $h->id);
+                $q->join('demand_help','demand_help.help_id','helps.id');
+                $q->join('demands','demands.id','demand_help.demand_id');
+                $q->join('people','people.id','demands.person_id');
+                $q->where('people.neighborhood_id','=',$n->id);
+                $q->where('helps.help_types_id','=', $h->id);
 
                 $toplam = $q->count();
 

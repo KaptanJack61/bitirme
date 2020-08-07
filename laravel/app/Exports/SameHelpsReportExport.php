@@ -34,7 +34,17 @@ class SameHelpsReportExport implements FromQuery, WithMapping, WithHeadings
         $last_date = Session::get('last_date');
 
         $data = Help::query();
-        $data->selectRaw('helps.first_name, helps.last_name, helps.phone, helps.neighborhood_id,helps.help_types_id, COUNT(helps.person_slug) as toplam');
+        $data->join('help_types','help_types.id','helps.help_types_id');
+        $data->join('statuses','helps.status_id','statuses.id');
+        $data->join('demand_help','demand_help.help_id','helps.id');
+        $data->join('demands','demands.id','demand_help.demand_id');
+        $data->join('people','people.id','demands.person_id');
+        $data->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+
+        $data->selectRaw('people.first_name, people.last_name, people.phone, 
+            neighborhoods.name as neighborhood,helps.help_types_id, COUNT(people.person_slug) as toplam, help_types.name as type'
+
+        );
         //$data->select('helps.*','COUNT(helps.person_slug) as toplam');
 
         if ($status != "all") {
@@ -51,12 +61,12 @@ class SameHelpsReportExport implements FromQuery, WithMapping, WithHeadings
         }
 
         if ($helptypes != "all"){
-            $data->whereIn('help_types_id',$helptypes);
+            $data->whereIn('helps.help_types_id',$helptypes);
 
         }
 
         if ($neighborhoods != "all") {
-            $data->whereIn('neighborhood_id',$neighborhoods);
+            $data->whereIn('people.neighborhood_id',$neighborhoods);
 
         }
 
@@ -77,8 +87,8 @@ class SameHelpsReportExport implements FromQuery, WithMapping, WithHeadings
 
         }
 
-        $data->groupBy(['helps.help_types_id','helps.person_slug','helps.phone']);
-        $data->havingRaw('COUNT(helps.person_slug) > 1');
+        $data->groupBy(['helps.help_types_id','people.person_slug','people.phone']);
+        $data->havingRaw('COUNT(people.person_slug) > 1');
         $data->orderByRaw('COUNT(helps.help_types_id) DESC');
 
         Session::forget('first_date');
@@ -95,8 +105,8 @@ class SameHelpsReportExport implements FromQuery, WithMapping, WithHeadings
         return [
             $help->first_name." ".$help->last_name,
             Helpers::phoneTextFormat($help->phone),
-            $help->neighborhood->name,
-            $help->type->name,
+            $help->neighborhood,
+            $help->type,
             $help->toplam,
         ];
     }

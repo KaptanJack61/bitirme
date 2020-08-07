@@ -1,6 +1,6 @@
 <html lang="tr">
 <head>
-    <title>SBYM | {{ config('app.name') }}</title>
+    <title>SYTS | {{ config('app.name') }}</title>
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -39,7 +39,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4 login-sec">
-                <h2 class="text-center">YARDIM MASASI</h2>
+                <h2 class="text-center">SOSYAL YARDIM TAKİP SİSTEMİ</h2>
                 @include('layouts.errors')
                 <form class="login-form" action="{{ route('yonetim.oturumac') }}" method="post">
                     {{ csrf_field() }}

@@ -17,16 +17,6 @@ class SameOneHelpsReportExport implements FromQuery, WithMapping, WithHeadings
     public function query()
     {
 
-        /*dd([
-            "İşlem" => "Aynı yardımı birden fazla alanlar",
-            "first date" => Session::get('first_date'),
-            "last date" => Session::get('last_date'),
-            "aynı yardım durumu" => Session::get('samehelp'),
-            "mahalleler" => Session::get('neighborhood'),
-            "yardım türleri" => Session::get('helptypes'),
-            "durumlar" => Session::get('status')
-        ]);*/
-
         $neighborhoods = Session::get('neighborhood');
         $helptypes = Session::get('helptypes');
         $status = Session::get('status');
@@ -34,8 +24,16 @@ class SameOneHelpsReportExport implements FromQuery, WithMapping, WithHeadings
         $last_date = Session::get('last_date');
 
         $data = Help::query();
-        $data->selectRaw('helps.first_name, helps.last_name, helps.phone, helps.neighborhood_id, COUNT(helps.person_slug) as toplam');
-        //$data->select('helps.*','COUNT(helps.person_slug) as toplam');
+        $data->join('help_types','help_types.id','helps.help_types_id');
+        $data->join('statuses','helps.status_id','statuses.id');
+        $data->join('demand_help','demand_help.help_id','helps.id');
+        $data->join('demands','demands.id','demand_help.demand_id');
+        $data->join('people','people.id','demands.person_id');
+        $data->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+
+        $data->selectRaw('people.first_name, people.last_name, people.phone, 
+        neighborhoods.name as neighborhood, COUNT(people.person_slug) as toplam, statuses.name as status');
+
 
         if ($status != "all") {
             $data->join('statuses','helps.status_id','=','statuses.id');
@@ -46,17 +44,17 @@ class SameOneHelpsReportExport implements FromQuery, WithMapping, WithHeadings
                 $data->where('statuses.finisher', '=', 1);
 
             }else{
-                $data->whereIn('statuses.id', $status);
+                $data->whereIn('helps.statuses.id', $status);
             }
         }
 
         if ($helptypes != "all"){
-            $data->whereIn('help_types_id',$helptypes);
+            $data->whereIn('helps.help_types_id',$helptypes);
 
         }
 
         if ($neighborhoods != "all") {
-            $data->whereIn('neighborhood_id',$neighborhoods);
+            $data->whereIn('people.neighborhood_id',$neighborhoods);
 
         }
 
@@ -77,9 +75,9 @@ class SameOneHelpsReportExport implements FromQuery, WithMapping, WithHeadings
 
         }
 
-        $data->groupBy(['helps.person_slug','helps.phone']);
-        $data->havingRaw('COUNT(helps.person_slug) > 1');
-        $data->orderByRaw('COUNT(helps.person_slug) DESC');
+        $data->groupBy(['people.person_slug','people.phone']);
+        $data->havingRaw('COUNT(people.person_slug) > 1');
+        $data->orderByRaw('COUNT(people.person_slug) DESC');
 
         Session::forget('first_date');
         Session::forget('last_date');
@@ -95,7 +93,7 @@ class SameOneHelpsReportExport implements FromQuery, WithMapping, WithHeadings
         return [
             $help->first_name." ".$help->last_name,
             Helpers::phoneTextFormat($help->phone),
-            $help->neighborhood->name,
+            $help->neighborhood,
             $help->toplam,
         ];
     }

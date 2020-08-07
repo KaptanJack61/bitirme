@@ -354,7 +354,7 @@
                         showCancelButton: true,
                         confirmButtonColor: '#3085d6',
                         cancelButtonColor: '#d33',
-                        confirmButtonText: 'Evet, güncellemek istiyorum!',
+                        confirmButtonText: 'Evet, eklemek istiyorum!',
                         cancelButtonText: 'Hayır',
                         showLoaderOnConfirm: false,
                         preConfirm: function() {

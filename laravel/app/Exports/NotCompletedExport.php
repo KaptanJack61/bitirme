@@ -20,9 +20,17 @@ class NotCompletedExport implements FromQuery, WithMapping, WithHeadings
         $lastdate = Session::get('last_date');
 
         $data = Help::query();
+        $data->join('help_types','help_types.id','helps.help_types_id');
         $data->join('statuses','helps.status_id','statuses.id');
-        $data->join('neighborhoods','helps.neighborhood_id','neighborhoods.id');
-        $data->select('helps.*');
+        $data->join('demand_help','demand_help.help_id','helps.id');
+        $data->join('demands','demands.id','demand_help.demand_id');
+        $data->join('people','people.id','demands.person_id');
+        $data->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+        $data->select('helps.*','help_types.name as type','help_types.metrik','people.first_name','people.last_name','people.city_name',
+            'people.street','people.gate_no','demands.detail','people.phone','neighborhoods.name as neighborhood',
+            'statuses.name as status'
+        );
+
         $data->where('statuses.finisher', '=', 0);
         $data->where('helps.help_types_id','=',$id);
         
@@ -56,11 +64,11 @@ class NotCompletedExport implements FromQuery, WithMapping, WithHeadings
     {
         return [
             $help->id,
-            $help->full_name,
+            $help->first_name." ".$help->last_name,
             Helpers::phoneTextFormat($help->phone),
-            $help->type->name,
-            $help->quantity." ".$help->type->metrik,
-            $help->neighborhood->name,
+            $help->type,
+            $help->quantity." ".$help->metrik,
+            $help->neighborhood,
             $help->street." ".$help->city_name." No: ".$help->gate_no,
             date('d M Y',strtotime($help->created_at)),
             date('d M Y',strtotime($help->updated_at)),

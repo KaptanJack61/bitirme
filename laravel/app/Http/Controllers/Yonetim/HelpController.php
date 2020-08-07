@@ -583,13 +583,29 @@ class HelpController extends Controller
 
         $demand = Demand::findOrFail($id);
 
+        $helps = $demand->helps;
+
+        $count = count($helps);
+        $closed = 0;
+
+        $isClosed = false;
+
+        foreach ($helps as $help) {
+            if ($help->status->finisher == true)
+                $closed++;
+        }
+
+        if ($closed == $count)
+            $isClosed = true;
+
         return view('yonetim.demands.details')->with([
             'demand_no' => $demand->id,
             'phone' => Helpers::phoneTextFormat($demand->person->phone),
             'full_name' => $demand->person->full_name,
             'helpList' => $demand->helps,
             'address' => $demand->person->address,
-            'detail' => $demand->detail
+            'detail' => $demand->detail,
+            'closed' => $isClosed
         ]);
     }
 
