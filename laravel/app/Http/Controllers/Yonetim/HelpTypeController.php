@@ -21,7 +21,7 @@ class HelpTypeController extends Controller
     }
 
     public function index(){
-        Helpers::sessionMenu('yardim-masasi','yardim-turleri');
+        Helpers::sessionMenu('parametre','yardim-turleri');
 
 
             $helpTypes = HelpType::all();

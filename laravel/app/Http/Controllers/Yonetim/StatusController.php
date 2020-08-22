@@ -12,7 +12,7 @@ use App\Http\Controllers\Controller;
 class StatusController extends Controller
 {
     public function index(){
-        Helpers::sessionMenu('yardim-masasi','durumlar');
+        Helpers::sessionMenu('parametre','durumlar');
         $statuses = Status::all();
         return view('yonetim.statuses.statuses')->with([
             'statuses' => $statuses

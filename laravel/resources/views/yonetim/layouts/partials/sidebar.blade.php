@@ -125,58 +125,91 @@
                                                     </p>
                                                 </a>
                                 </li>
-
-                                @if (Auth::guard('yonetim')->user()->admin)
-
-                                <li class="nav-item">
-                                    @if(Session::get('menu_aktif')=='yardim-turleri')
-                                        <a href="{{route('yardimturleri.index')}}" class="nav-link active">
-                                            @else
-                                                <a href="{{route('yardimturleri.index')}}" class="nav-link">
-                                                    @endif
-
-                                                    <i class="fa fa-gift nav-icon"></i>
-                                                    <p>Yardım Türleri</p>
-                                                </a>
-                                </li>
-                                <li class="nav-item">
-                                    @if(Session::get('menu_aktif')=='durumlar')
-                                        <a href="{{route('statuses.index')}}" class="nav-link active">
-                                            @else
-                                                <a href="{{route('statuses.index')}}" class="nav-link">
-                                                    @endif
-
-                                                    <i class="fa fa-signal nav-icon"></i>
-                                                    <p>Durum Bilgileri</p>
-                                                </a>
-                                </li>
-                                <li class="nav-item">
-                                    @if(Session::get('menu_aktif')=='raporlar')
-                                        <a href="{{route('raporlar.index')}}" class="nav-link active">
-                                            @else
-                                                <a href="{{route('raporlar.index')}}" class="nav-link">
-                                                    @endif
-
-                                                    <i class="fa fa-flag-checkered nav-icon"></i>
-                                                    <p>Raporlar</p>
-                                                </a>
-                                </li>
-
-                                    <li class="nav-item">
-                                        @if(Session::get('menu_aktif')=='istatistik')
-                                            <a href="{{route('statistic.index')}}" class="nav-link active">
-                                                @else
-                                                    <a href="{{route('statistic.index')}}" class="nav-link">
-                                                        @endif
-
-                                                        <i class="fa fa-chart-pie nav-icon"></i>
-                                                        <p>İstatistikler</p>
-                                                    </a>
-                                    </li>
-                                @endif
                             </ul>
                         </li>
 
+                        @if (Auth::guard('yonetim')->user()->admin)
+                            @if(Session::get('menu_acilma')=='raporlar-i̇statistikler')
+                                <li class="nav-item has-treeview menu-open">
+                                    <a href="#" class="nav-link active">
+                            @else
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link">
+                                        @endif
+                                        <i class="nav-icon fa fa-chart-area"></i>
+                                        <p>
+                                            Raporlar & İstatistik
+                                            <i class="right fa fa-angle-left"></i>
+                                        </p>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            @if(Session::get('menu_aktif')=='raporlar')
+                                                <a href="{{route('raporlar.index')}}" class="nav-link active">
+                                                    @else
+                                                        <a href="{{route('raporlar.index')}}" class="nav-link">
+                                                            @endif
+
+                                                            <i class="fa fa-flag-checkered nav-icon"></i>
+                                                            <p>Raporlar</p>
+                                                        </a>
+                                        </li>
+
+                                        <li class="nav-item">
+                                            @if(Session::get('menu_aktif')=='istatistik')
+                                                <a href="{{route('statistic.index')}}" class="nav-link active">
+                                                    @else
+                                                        <a href="{{route('statistic.index')}}" class="nav-link">
+                                                            @endif
+
+                                                            <i class="fa fa-chart-pie nav-icon"></i>
+                                                            <p>İstatistikler</p>
+                                                        </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            @endif
+
+                        @if (Auth::guard('yonetim')->user()->admin)
+                            @if(Session::get('menu_acilma')=='parametre')
+                                <li class="nav-item has-treeview menu-open">
+                                    <a href="#" class="nav-link active">
+                            @else
+                                <li class="nav-item has-treeview">
+                                    <a href="#" class="nav-link">
+                                        @endif
+                                        <i class="nav-icon fa fa-cogs"></i>
+                                        <p>
+                                            Parametre Yönetimi
+                                            <i class="right fa fa-angle-left"></i>
+                                        </p>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        <li class="nav-item">
+                                            @if(Session::get('menu_aktif')=='yardim-turleri')
+                                                <a href="{{route('yardimturleri.index')}}" class="nav-link active">
+                                                    @else
+                                                        <a href="{{route('yardimturleri.index')}}" class="nav-link">
+                                                            @endif
+
+                                                            <i class="fa fa-gift nav-icon"></i>
+                                                            <p>Yardım Türleri</p>
+                                                        </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            @if(Session::get('menu_aktif')=='durumlar')
+                                                <a href="{{route('statuses.index')}}" class="nav-link active">
+                                                    @else
+                                                        <a href="{{route('statuses.index')}}" class="nav-link">
+                                                            @endif
+
+                                                            <i class="fa fa-signal nav-icon"></i>
+                                                            <p>Durum Bilgileri</p>
+                                                        </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                        @endif
         </ul>
       </nav>
       <!-- /.sidebar-menu -->

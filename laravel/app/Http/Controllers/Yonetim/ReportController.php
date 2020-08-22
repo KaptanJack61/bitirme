@@ -23,7 +23,7 @@ class ReportController extends Controller
 
     public function index(){
 
-        Helpers::sessionMenu('yardim-masasi','raporlar');
+        Helpers::sessionMenu('raporlar-i̇statistikler','raporlar');
 
         return view('yonetim.reports.reports');
     }

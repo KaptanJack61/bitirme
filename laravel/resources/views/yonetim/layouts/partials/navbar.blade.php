@@ -9,9 +9,11 @@
         <a href="{{ route('yonetim.anasayfa') }}" class="nav-link">Anasayfa</a>
       </li>
       @if (Auth::guard('yonetim')->user()->admin)
+            <!--
             <li class="nav-item d-none d-sm-inline-block">
                 <a href="{{ route('trying.index') }}" class="nav-link">Deneme Alanı</a>
             </li>
+            -->
       @endif
     </ul>
 

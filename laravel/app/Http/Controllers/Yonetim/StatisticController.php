@@ -15,7 +15,7 @@ class StatisticController extends Controller
 
 
     public function index(){
-        Helpers::sessionMenu('yardim-masasi','istatistik');
+        Helpers::sessionMenu('raporlar-i̇statistikler','istatistik');
 
         return view('yonetim.statistic.statistic');
     }
