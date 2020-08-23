@@ -71,7 +71,15 @@ class HelpTypeController extends Controller
         $helpType = HelpType::findOrFail($id);
 
         $hqb = Help::query();
-        $hqb->where('help_types_id','=',$id);
+        $hqb->join('demand_help','helps.id','demand_help.help_id');
+        $hqb->join('demands','demands.id','demand_help.demand_id');
+        $hqb->join('people','people.id','demands.person_id');
+        $hqb->join('neighborhoods','neighborhoods.id','people.neighborhood_id');
+        $hqb->select('helps.*','people.first_name','people.last_name','people.city_name',
+            'people.street','people.gate_no','demands.detail','people.phone','neighborhoods.name as neighborhood');
+
+        $hqb->where('helps.help_types_id','=',$id);
+
         $helps = $hqb->get();
 
         return view('yonetim.helptypes.helps')->with([

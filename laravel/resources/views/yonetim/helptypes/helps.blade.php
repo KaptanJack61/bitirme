@@ -45,71 +45,96 @@
               <tr>
                 <th class="text-center">#</th>
                   <th>Ad Soyad</th>
-                  <th>Yardım Türü</th>
+                  <th>Telefon</th>
                   <th>Miktarı</th>
+                  <th>Mahalle</th>
                   <th>Adres</th>
                   <th>Durum</th>
-                <th class="text-center">Tarihi</th>
+                <th class="text-center">Kayıt Tarihi</th>
+                  <th class="text-center">Son İşl. Tarihi</th>
                 <th class="text-right">İşlemler</th>
               </tr>
               </thead>
               <tbody>
               @foreach($helps as $h)
-                @if($h->status->finisher==true)
-                  <tr style="background-color: #00cc66">
-                      @else
-                    <tr>
-                 @endif
-                  <td class="text-center">{{ $h->id }}</td>
-                  <td>{{ $h->full_name }}</td>
-                    <td>{{ $h->type->name }}</td>
-                    <td>{{ $h->quantity." ".$h->type->metrik }}</td>
-                    <td>
-                        {{ $h->neighborhood->name." ".$h->street." ".
-                                $h->cty_name. " No:".$h->gate_no  }}
-                    </td>
-                    <td>{{ $h->status->name }}</td>
-                  <td class="text-center">{{ date('d.m.Y', strtotime($h->created_at)) }}</td>
-                  <td class="text-center">
-                    @if($h->status->finisher==false)
-                          <a href="#" class="btn btn-success btn-sm" data-toggle="modal"
-                             data-target="#completed"
-                             data-helpid="{{$h->id}}"
-                          >
-                              <i class="fa fa-check"></i>
-                          </a>
-                          <a href="#" class="btn btn-warning btn-sm" data-toggle="modal"
-                             data-target="#helpEdit"
-                             data-helpid="{{$h->id}}"
-                             data-quantity="{{$h->quantity}}"
-                             data-metrik="{{$h->type->metrik}}"
-                             data-helptypeid="{{$h->type->id}}"
-                             data-name="{{$h->type->name}}"
-                             data-statusid="{{$h->status->id}}"
-                             data-statusname="{{$h->status->name}}"
-                          >
-                              <i class="fa fa-edit"></i>
-                          </a>
+                  <tr data-toggle="tooltip" data-placement="top" title="{{ $h->detail }}">
 
-                          <a id="sil" href="{{route('yardimtalebi.destroy',['id'=>$h->id])}}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Sil">
-                              <i class="fa fa-trash"></i>
-                          </a>
-                    @endif
 
-                  </td>
-                </tr>
+                      <td class="text-center">{{ $h->id }}</td>
+                      <td>{{ $h->first_name." ".$h->last_name }}</td>
+                      <td>{{ Helpers::phoneTextFormat($h->phone) }}</td>
+                      <td>{{ $h->quantity." ".$h->type->metrik }}</td>
+                      <td>{{ $h->neighborhood }}</td>
+                      <td>
+                          {{ $h->street." ".$h->cty_name. " No:".$h->gate_no  }}
+                      </td>
+                      <td>
+                          @if($h->status->finisher == false and $h->status->id == 1)
+                              <h5><span class="badge badge-pill badge-success">{{ $h->status->name }}</span></h5>
+                          @elseif($h->status->finisher == true and $h->status->id == 5)
+                              <h5><span class="badge badge-pill badge-danger">{{ $h->status->name }}</span></h5>
+                          @elseif($h->status->finisher == false and $h->status->id != 1)
+                              <h5><span class="badge badge-pill badge-warning">{{ $h->status->name }}</span></h5>
+                          @elseif($h->status->finisher == true and $h->status->id != 5)
+                              <h5><span class="badge badge-pill badge-secondary">{{ $h->status->name }}</span></h5>
+                          @endif
+                      </td>
+
+                      <td class="text-center">{{ date('d.m.Y', strtotime($h->created_at)) }}</td>
+                      <td class="text-center">{{ date('d.m.Y', strtotime($h->updated_at)) }}</td>
+                      <td class="text-center">
+                          @if($h->status->finisher==false)
+                              <a href="#" class="btn btn-success btn-sm" data-toggle="modal"
+                                 data-target="#completed"
+                                 data-helpid="{{$h->id}}"
+                              >
+                                  <i class="fa fa-check"></i>
+                              </a>
+                              <a href="#" class="btn btn-warning btn-sm" data-toggle="modal"
+                                 data-target="#helpEdit"
+                                 data-helpid="{{$h->id}}"
+                                 data-quantity="{{$h->quantity}}"
+                                 data-metrik="{{$h->type->metrik}}"
+                                 data-helptypeid="{{$h->type->id}}"
+                                 data-name="{{$h->type->name}}"
+                                 data-statusid="{{$h->status->id}}"
+                                 data-statusname="{{$h->status->name}}"
+                                 data-street="{{$h->street}}"
+                                 data-cityname="{{$h->city_name}}"
+                                 data-gateno="{{$h->gate_no}}"
+
+                              >
+                                  <i class="fa fa-edit"></i>
+                              </a>
+
+                              <a id="sil" href="{{route('yardimtalebi.destroy',['id'=>$h->id])}}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Sil">
+                                  <i class="fa fa-trash"></i>
+                              </a>
+                          @else
+                              <a href="#" class="btn btn-warning btn-sm" data-toggle="modal"
+                                 data-target="#completed"
+                                 data-helpid="{{$h->id}}"
+                              >
+                                  <i class="fa fa-edit"></i>
+                              </a>
+                          @endif
+
+                      </td>
+                  </tr>
               @endforeach
               </tbody>
               <tfoot>
               <tr>
                   <th class="text-center">#</th>
                   <th>Ad Soyad</th>
-                  <th>Yardım Türü</th>
+                  <th>Telefon</th>
                   <th>Miktarı</th>
+                  <th>Mahalle</th>
                   <th>Adres</th>
                   <th>Durum</th>
-                  <th class="text-center">Tarihi</th>
-                  <th class="text-center">İşlemler</th>
+                  <th class="text-center">Kayıt Tarihi</th>
+                  <th class="text-center">Son İşl. Tarihi</th>
+                  <th class="text-right">İşlemler</th>
               </tr>
               </tfoot>
             </table>

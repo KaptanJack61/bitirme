@@ -48,7 +48,7 @@
                 <th class="text-center">#</th>
                   <th>Ad Soyad</th>
                   <th>Telefon</th>
-                  <th>Miktarı</th>
+                  <th>Yardım Sayısı</th>
                   <th>Mahalle</th>
                   <th>Cadde & Sokak</th>
                 <th class="text-center">K. Tarihi</th>
@@ -97,7 +97,7 @@
                   <th>#</th>
                   <th>Ad Soyad</th>
                   <th>Telefon</th>
-                  <th>Miktarı</th>
+                  <th>Yardım Sayısı</th>
                   <th>Mahalle</th>
                   <th>Cadde & Sokak</th>
                   <th class="text-center">K. Tarihi</th>

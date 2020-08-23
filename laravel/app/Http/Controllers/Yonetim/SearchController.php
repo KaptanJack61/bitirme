@@ -140,7 +140,7 @@ class SearchController extends Controller
 
     public function searchWithStreet($streetName){
 
-        $helps = $this->helpSqlQuery('people.person_slug',$streetName,"like");
+        $helps = $this->helpSqlQuery('people.street',$streetName,"like");
 
         if (count($helps) != 0){
             return view('yonetim.search.street')->with([

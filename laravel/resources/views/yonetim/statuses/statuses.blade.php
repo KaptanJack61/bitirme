@@ -78,9 +78,6 @@
                       <a id="sil" href="{{ route('statuses.destroy',['id' => $s->id]) }}" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Sil">
                           <i class="fa fa-trash"></i>
                       </a>
-                    <a id="goruntule" href="{{ route('statuses.showByAllHelps',['id' => $s->id]) }}" class="btn btn-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Görüntüle">
-                      <i class="fa fa-eye"></i>
-                    </a>
                   </td>
                 </tr>
               @endforeach
