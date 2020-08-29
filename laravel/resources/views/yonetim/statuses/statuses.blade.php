@@ -157,7 +157,7 @@
             var link = $(this);
             swal({
                 title: 'Silmek istediğinize emin misiniz?',
-                text: "Yardım türü silinecek. Bu işlemin geri dönüşü yok!",
+                text: "Durum bilgisi silinecek. Bu işlemin geri dönüşü yok!",
                 type: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',

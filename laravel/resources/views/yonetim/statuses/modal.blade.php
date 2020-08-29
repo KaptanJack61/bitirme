@@ -2,7 +2,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Yardım Türü Güncelle</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Durum Bilgisi Güncelle</h5>
             </div>
             <div class="modal-body">
                 <form id="helpTypeEditForm" action="{{ route('statuses.update') }} " method="post">
@@ -41,7 +41,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Yardım Türü Ekle</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Durum Bilgisi Ekle</h5>
             </div>
             <div class="modal-body">
                 <form id="helpTypeAddForm" action="{{ route('statuses.store') }} " method="post">
