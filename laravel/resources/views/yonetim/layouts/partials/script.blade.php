@@ -39,7 +39,11 @@
 <script src="/js/sweetalert2.all.js"></script>
 
 
-
+<script>
+    $('table').on('draw.dt', function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+</script>
 
 
 @include('sweetalert::alert')

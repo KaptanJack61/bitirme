@@ -286,6 +286,7 @@
     <script src="/js/plugins/input-mask/jquery.inputmask.js"></script>
     <script src="/js/plugins/input-mask/jquery.inputmask.extensions.js"></script>
     <script src="/js/plugins/select2/select2.full.min.js"></script>
+    <script src="/vendor/laravel-filemanager/js/stand-alone-button.js"></script>
     @include('yonetim.layouts.partials.ckeditor')
     <script>
         var options2 = {

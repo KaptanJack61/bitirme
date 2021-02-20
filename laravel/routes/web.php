@@ -10,7 +10,8 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+use Illuminate\Support\Facades\Route;
+use UniSharp\LaravelFilemanager\Lfm;
 
 Route::group(['namespace' => 'Yonetim'], function () {
     Route::redirect('/', '/oturumac');
@@ -20,8 +21,12 @@ Route::group(['namespace' => 'Yonetim'], function () {
 
     Route::post('/deneme/dosya', 'AnasayfaController@deneme');
 
-    Route::get('/dosya-yoneticisi', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show');
-    Route::post('/dosya-yoneticisi/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');
+    /*Route::get('/dosya-yoneticisi', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show');
+    Route::post('/dosya-yoneticisi/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');*/
+
+    Route::group(['prefix' => 'dosya-yoneticisi'], function () {
+        Lfm::routes();
+    });
 
     Route::any('/ckfinder/connector', '\CKSource\CKFinderBridge\Controller\CKFinderController@requestAction')
         ->name('ckfinder_connector');

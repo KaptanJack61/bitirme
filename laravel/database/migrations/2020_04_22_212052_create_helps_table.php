@@ -6,11 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateHelpsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
+
     public function up()
     {
         Schema::create('helps', function (Blueprint $table) {
@@ -29,11 +25,6 @@ class CreateHelpsTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('helps');

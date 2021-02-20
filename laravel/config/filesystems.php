@@ -50,16 +50,17 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            'root' => storage_path('laravel/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
         ],
 
         'upload' => [
+            //'visibility' => 'upload',
             'driver' => 'local',
-            'root' => '../wwwroot/upload',
-            'url' => env('APP_URL')."/upload",
-            'visibility' => 'upload',
+            'root' => public_path('upload'),
+            'url' => config('app.url') . '/upload',
+            'visibility' => 'public',
         ],
 
         's3' => [

@@ -173,6 +173,7 @@ return [
         Intervention\Image\ImageServiceProvider::class,
         UniSharp\LaravelFilemanager\LaravelFilemanagerServiceProvider::class,
         App\Providers\HelperServiceProvider::class,
+        Barryvdh\Debugbar\ServiceProvider::class,
 
         // 3. Parti Providers
 
@@ -243,6 +244,7 @@ return [
         'Helpers' => App\Helpers\Helpers::class,
         'FastExcel' => Rap2hpoutre\FastExcel\Facades\FastExcel::class,
         'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+        'Debugbar' => Barryvdh\Debugbar\Facade::class,
 
         // 3. Parti alias
 

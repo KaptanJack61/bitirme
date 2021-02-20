@@ -13,6 +13,7 @@ use App\Models\Neighborhood;
 use DataTables;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Str;
 
 class HelpController extends Controller
 {
@@ -518,7 +519,7 @@ class HelpController extends Controller
             $person = new Person;
             $person->first_name = $request->first_name;
             $person->last_name = $request->last_name;
-            $person->person_slug = str_slug($request->first_name." ".$request->last_name);
+            $person->person_slug = Str::slug($request->first_name." ".$request->last_name);
             $person->phone = Helpers::convertToIntPhone($request->phone);
             if ($request->tc_no!=null)
                 $person->tc_no = $request->tc_no;
